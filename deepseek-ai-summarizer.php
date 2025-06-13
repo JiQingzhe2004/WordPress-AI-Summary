@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: DeepSeek AI 文章摘要生成器
- * Plugin URI: https://github.com/your-username/deepseek-ai-summarizer
- * Description: 使用DeepSeek AI自动生成文章摘要和SEO优化内容，支持流式输出效果
- * Version: 2.0.0
+ * Plugin Name: 爱奇吉摘要生成
+ * Plugin URI: https://github.com/JiQingzhe2004/WordPress-AI-Summary
+ * Description: 使用爱奇吉摘要生成自动生成文章摘要和SEO优化内容，支持流式输出效果
+ * Version: 2.1.0
  * Author: 吉庆喆
  * License: GPL v2 or later
  * Text Domain: deepseek-ai-summarizer
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
 // 定义插件常量
 define('DEEPSEEK_AI_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('DEEPSEEK_AI_PLUGIN_PATH', plugin_dir_path(__FILE__));
-define('DEEPSEEK_AI_VERSION', '2.0.0');
+define('DEEPSEEK_AI_VERSION', '2.1.0');
 
 class DeepSeekAISummarizer {
     
@@ -43,7 +43,7 @@ class DeepSeekAISummarizer {
         file_put_contents($this->log_file, $log_entry, FILE_APPEND | LOCK_EX);
         
         // 同时写入WordPress错误日志
-        error_log('DeepSeek AI: ' . $message);
+        error_log('爱奇吉摘要生成: ' . $message);
     }
     
     public function init() {
@@ -146,20 +146,20 @@ class DeepSeekAISummarizer {
     }
     
     public function settings_section_callback() {
-        echo '<p>请配置DeepSeek AI的API设置</p>';
+        echo '<p>请配置爱奇吉摘要生成的API设置</p>';
     }
     
     public function api_key_field_callback() {
         $api_key = get_option('deepseek_ai_api_key', '');
         echo '<input type="text" name="deepseek_ai_api_key" value="' . esc_attr($api_key) . '" class="regular-text" />';
-        echo '<p class="description">请输入您的DeepSeek API Key</p>';
+        echo '<p class="description">请输入您的爱奇吉API Key</p>';
     }
     
     public function model_field_callback() {
         $model = get_option('deepseek_ai_model', 'deepseek-chat');
         echo '<select name="deepseek_ai_model">';
         echo '<option value="deepseek-chat"' . selected($model, 'deepseek-chat', false) . '>deepseek-chat</option>';
-        echo '<option value="deepseek-coder"' . selected($model, 'deepseek-coder', false) . '>deepseek-coder</option>';
+        echo '<option value="deepseek-reasoner"' . selected($model, 'deepseek-reasoner', false) . '>deepseek-reasoner</option>';
         echo '</select>';
     }
     
@@ -174,12 +174,14 @@ class DeepSeekAISummarizer {
     }
     
     public function add_admin_menu() {
-        add_options_page(
-            'DeepSeek AI 设置',
-            'DeepSeek AI',
+        add_menu_page(
+            '爱奇吉摘要生成 设置',
+            '爱奇吉摘要生成',
             'manage_options',
             'deepseek-ai-settings',
-            array($this, 'admin_page')
+            array($this, 'admin_page'),
+            plugins_url('img/deepseek-color.png', __FILE__),
+            25
         );
     }
     
@@ -238,8 +240,8 @@ class DeepSeekAISummarizer {
     
     public function add_meta_boxes() {
         add_meta_box(
-            'deepseek-ai-generator',
-            'DeepSeek AI 内容生成器',
+            'aiqiji-summary-generator',
+            '爱奇吉摘要生成 内容生成器',
             array($this, 'meta_box_callback'),
             'post',
             'normal',
@@ -580,7 +582,7 @@ class DeepSeekAISummarizer {
                 $summary_html = '<div class="deepseek-ai-summary-container">';
                 $summary_html .= '<div class="deepseek-ai-summary-header">';
                 $summary_html .= '<span class="deepseek-ai-icon"></span>';
-                $summary_html .= '<span class="deepseek-ai-title">AI 智能摘要</span>';
+                $summary_html .= '<span class="deepseek-ai-title">AI 智能摘要（爱奇吉）</span>';
                 $summary_html .= '</div>';
                 $summary_html .= '<div class="deepseek-ai-summary-content">' . wp_kses_post($summary) . '</div>';
                 $summary_html .= '</div>';

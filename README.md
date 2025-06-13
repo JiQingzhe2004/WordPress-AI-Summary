@@ -1,6 +1,6 @@
-# DeepSeek AI 文章摘要生成器
+# 爱奇吉摘要生成
 
-一个功能强大的WordPress插件，使用DeepSeek AI自动生成文章摘要和SEO优化内容，具有科技感的界面设计和流式输出效果。
+一个功能强大的WordPress插件，使用爱奇吉摘要生成自动生成文章摘要和SEO优化内容，具有科技感的界面设计和流式输出效果。
 
 ## 功能特点
 
@@ -27,14 +27,14 @@
 - **AJAX异步处理**：无需刷新页面
 - **错误重试机制**：网络异常时自动重试
 - **安全验证**：完整的nonce验证和权限检查
-- **API配置灵活**：支持多种DeepSeek模型和参数调整
+- **API配置灵活**：支持多种模型和参数调整
 
 ## 安装说明
 
 ### 方法一：手动安装
 1. 下载插件文件到WordPress的`wp-content/plugins/`目录
 2. 在WordPress后台进入「插件」页面
-3. 找到「DeepSeek AI 文章摘要生成器」并点击「启用」
+3. 找到「爱奇吉摘要生成」并点击「启用」
 
 ### 方法二：上传安装
 1. 将插件文件夹打包为zip文件
@@ -44,16 +44,16 @@
 
 ## 配置设置
 
-### 1. 获取DeepSeek API Key
-1. 访问 [DeepSeek官网](https://platform.deepseek.com/)
+### 1. 获取API Key
+1. 访问 [爱奇吉官网](https://platform.deepseek.com/)
 2. 注册账号并登录
 3. 进入API管理页面创建新的API Key
 4. 复制生成的API Key
 
 ### 2. 插件配置
-1. 在WordPress后台进入「设置」→「DeepSeek AI」
+1. 在WordPress后台进入「爱奇吉摘要生成」菜单
 2. 输入您的API Key
-3. 选择合适的模型（推荐使用deepseek-chat）
+3. 选择合适的模型（推荐使用默认模型）
 4. 调整生成参数：
    - **最大Token数**：控制生成内容的长度（建议500-1000）
    - **Temperature**：控制生成内容的创造性（建议0.7）
@@ -62,7 +62,7 @@
 ## 使用方法
 
 ### 生成文章摘要
-1. 在文章编辑页面，向下滚动到「DeepSeek AI 内容生成器」元框
+1. 在文章编辑页面，向下滚动到「爱奇吉摘要生成 内容生成器」元框
 2. 确保文章内容已填写（至少50字）
 3. 点击「生成摘要」按钮
 4. 等待AI生成完成，摘要将以流式效果显示
@@ -99,7 +99,7 @@
 - WordPress 5.0 或更高版本
 - PHP 7.4 或更高版本
 - 支持cURL的服务器环境
-- 有效的DeepSeek API Key
+- 有效的API Key
 
 ### 兼容性
 - 兼容所有标准WordPress主题
@@ -120,7 +120,7 @@
 **Q: 生成失败，显示"生成摘要失败"**
 A: 请检查：
 1. API Key是否正确设置
-2. 服务器是否能访问DeepSeek API
+2. 服务器是否能访问API
 3. 文章内容是否足够长（至少50字）
 4. 网络连接是否正常
 
@@ -148,15 +148,15 @@ define('WP_DEBUG_LOG', true);
 
 ## API使用说明
 
-### DeepSeek API配置
-- **端点**：`https://api.deepseek.com/v1/chat/completions`
+### API配置
+- **端点**：`https://platform.deepseek.com/v1/chat/completions`
 - **认证**：Bearer Token
 - **支持模型**：
-  - `deepseek-chat`：通用对话模型（推荐）
-  - `deepseek-coder`：代码专用模型
+  - 默认模型（推荐）
+  - 其它可选模型
 
 ### 请求限制
-- 请遵守DeepSeek API的使用限制
+- 请遵守API的使用限制
 - 建议设置合理的超时时间（30秒）
 - 实现适当的错误处理和重试机制
 
@@ -186,4 +186,4 @@ define('WP_DEBUG_LOG', true);
 
 ---
 
-**注意**：使用本插件需要有效的DeepSeek API Key，API调用可能产生费用，请根据您的使用情况合理控制调用频率。
+**注意**：使用本插件需要有效的API Key，API调用可能产生费用，请根据您的使用情况合理控制调用频率。
