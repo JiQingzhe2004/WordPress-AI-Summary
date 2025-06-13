@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: 爱奇吉摘要生成
+ * Plugin Name: 爱奇吉摘要
  * Plugin URI: https://github.com/JiQingzhe2004/WordPress-AI-Summary
- * Description: 使用爱奇吉摘要生成自动生成文章摘要和SEO优化内容，支持流式输出效果
+ * Description: 使用爱奇吉摘要自动生成文章摘要和SEO优化内容，支持流式输出效果
  * Version: 2.1.0
  * Author: 吉庆喆
  * License: GPL v2 or later
@@ -43,7 +43,7 @@ class DeepSeekAISummarizer {
         file_put_contents($this->log_file, $log_entry, FILE_APPEND | LOCK_EX);
         
         // 同时写入WordPress错误日志
-        error_log('爱奇吉摘要生成: ' . $message);
+        error_log('爱奇吉摘要: ' . $message);
     }
     
     public function init() {
@@ -146,7 +146,7 @@ class DeepSeekAISummarizer {
     }
     
     public function settings_section_callback() {
-        echo '<p>请配置爱奇吉摘要生成的API设置</p>';
+        echo '<p>请配置爱奇吉摘要的API设置</p>';
     }
     
     public function api_key_field_callback() {
@@ -175,8 +175,8 @@ class DeepSeekAISummarizer {
     
     public function add_admin_menu() {
         add_menu_page(
-            '爱奇吉摘要生成 设置',
-            '爱奇吉摘要生成',
+            '爱奇吉摘要 设置',
+            '爱奇吉摘要',
             'manage_options',
             'deepseek-ai-settings',
             array($this, 'admin_page'),
@@ -241,7 +241,7 @@ class DeepSeekAISummarizer {
     public function add_meta_boxes() {
         add_meta_box(
             'aiqiji-summary-generator',
-            '爱奇吉摘要生成 内容生成器',
+            '爱奇吉摘要 内容生成器',
             array($this, 'meta_box_callback'),
             'post',
             'normal',
