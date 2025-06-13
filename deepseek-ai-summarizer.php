@@ -180,7 +180,7 @@ class DeepSeekAISummarizer {
             'manage_options',
             'deepseek-ai-settings',
             array($this, 'admin_page'),
-            plugins_url('img/deepseek-color.png', __FILE__),
+            plugins_url('img/deepseek-color.svg', __FILE__),
             25
         );
     }
