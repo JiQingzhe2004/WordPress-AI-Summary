@@ -39,7 +39,19 @@ class DeepSeekAI_Admin {
     
     public function register_settings() {
         // 注册设置组
+        register_setting('deepseek_ai_settings', 'deepseek_ai_provider', array(
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => 'zhipu'
+        ));
+        
         register_setting('deepseek_ai_settings', 'deepseek_ai_api_key', array(
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => ''
+        ));
+        
+        register_setting('deepseek_ai_settings', 'zhipu_ai_api_key', array(
             'type' => 'string',
             'sanitize_callback' => 'sanitize_text_field',
             'default' => ''
@@ -58,6 +70,25 @@ class DeepSeekAI_Admin {
         ));
         
         register_setting('deepseek_ai_settings', 'deepseek_ai_temperature', array(
+            'type' => 'number',
+            'sanitize_callback' => 'floatval',
+            'default' => 0.7
+        ));
+        
+        // 智谱清言设置
+        register_setting('deepseek_ai_settings', 'zhipu_ai_model', array(
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => 'glm-4-flash'
+        ));
+        
+        register_setting('deepseek_ai_settings', 'zhipu_ai_max_tokens', array(
+            'type' => 'integer',
+            'sanitize_callback' => 'absint',
+            'default' => 500
+        ));
+        
+        register_setting('deepseek_ai_settings', 'zhipu_ai_temperature', array(
             'type' => 'number',
             'sanitize_callback' => 'floatval',
             'default' => 0.7
@@ -117,8 +148,50 @@ class DeepSeekAI_Admin {
         
         // 添加设置字段
         add_settings_field(
+            'deepseek_ai_provider',
+            'AI服务提供商',
+            array($this, 'provider_field_callback'),
+            'deepseek-ai-settings',
+            'deepseek_ai_main_section'
+        );
+        
+        // 智谱清言设置（默认推荐）
+        add_settings_field(
+            'zhipu_ai_api_key',
+            '智谱清言 API Key',
+            array($this, 'zhipu_api_key_field_callback'),
+            'deepseek-ai-settings',
+            'deepseek_ai_main_section'
+        );
+        
+        add_settings_field(
+            'zhipu_ai_model',
+            '智谱清言 模型',
+            array($this, 'zhipu_model_field_callback'),
+            'deepseek-ai-settings',
+            'deepseek_ai_main_section'
+        );
+        
+        add_settings_field(
+            'zhipu_ai_max_tokens',
+            '智谱清言 最大Token数',
+            array($this, 'zhipu_max_tokens_field_callback'),
+            'deepseek-ai-settings',
+            'deepseek_ai_main_section'
+        );
+        
+        add_settings_field(
+            'zhipu_ai_temperature',
+            '智谱清言 Temperature',
+            array($this, 'zhipu_temperature_field_callback'),
+            'deepseek-ai-settings',
+            'deepseek_ai_main_section'
+        );
+        
+        // DeepSeek设置
+        add_settings_field(
             'deepseek_ai_api_key',
-            'API Key',
+            'DeepSeek API Key',
             array($this, 'api_key_field_callback'),
             'deepseek-ai-settings',
             'deepseek_ai_main_section'
@@ -126,7 +199,7 @@ class DeepSeekAI_Admin {
         
         add_settings_field(
             'deepseek_ai_model',
-            '模型',
+            'DeepSeek 模型',
             array($this, 'model_field_callback'),
             'deepseek-ai-settings',
             'deepseek_ai_main_section'
@@ -134,7 +207,7 @@ class DeepSeekAI_Admin {
         
         add_settings_field(
             'deepseek_ai_max_tokens',
-            '最大Token数',
+            'DeepSeek 最大Token数',
             array($this, 'max_tokens_field_callback'),
             'deepseek-ai-settings',
             'deepseek_ai_main_section'
@@ -142,7 +215,7 @@ class DeepSeekAI_Admin {
         
         add_settings_field(
             'deepseek_ai_temperature',
-            'Temperature',
+            'DeepSeek Temperature',
             array($this, 'temperature_field_callback'),
             'deepseek-ai-settings',
             'deepseek_ai_main_section'
@@ -215,28 +288,84 @@ class DeepSeekAI_Admin {
         echo '<div class="notice notice-warning inline"><p><strong>注意：</strong>调试模式会记录详细的运行信息，可能会影响性能。建议仅在需要时启用。</p></div>';
     }
     
+    public function provider_field_callback() {
+        $provider = get_option('deepseek_ai_provider', 'zhipu');
+        echo '<select name="deepseek_ai_provider" id="ai_provider_select">';
+        echo '<option value="zhipu"' . selected($provider, 'zhipu', false) . '>智谱清言 GLM-4（推荐）</option>';
+        echo '<option value="deepseek"' . selected($provider, 'deepseek', false) . '>DeepSeek</option>';
+        echo '</select>';
+        echo '<p class="description">选择要使用的AI服务提供商，推荐使用智谱清言GLM-4</p>';
+    }
+    
     public function api_key_field_callback() {
         $api_key = get_option('deepseek_ai_api_key', '');
+        echo '<div class="provider-field deepseek">';
         echo '<input type="text" name="deepseek_ai_api_key" value="' . esc_attr($api_key) . '" class="regular-text" />';
-        echo '<p class="description">请输入您的爱奇吉API Key</p>';
+        echo '<p class="description">请输入您的DeepSeek API Key</p>';
+        echo '</div>';
+    }
+    
+    public function zhipu_api_key_field_callback() {
+        $api_key = get_option('zhipu_ai_api_key', '');
+        echo '<div class="provider-field zhipu">';
+        echo '<input type="text" name="zhipu_ai_api_key" value="' . esc_attr($api_key) . '" class="regular-text" />';
+        echo '<p class="description">请输入您的智谱清言 API Key</p>';
+        echo '</div>';
     }
     
     public function model_field_callback() {
         $model = get_option('deepseek_ai_model', 'deepseek-chat');
+        echo '<div class="provider-field deepseek">';
         echo '<select name="deepseek_ai_model">';
         echo '<option value="deepseek-chat"' . selected($model, 'deepseek-chat', false) . '>deepseek-chat</option>';
         echo '<option value="deepseek-reasoner"' . selected($model, 'deepseek-reasoner', false) . '>deepseek-reasoner</option>';
         echo '</select>';
+        echo '</div>';
+    }
+    
+    public function zhipu_model_field_callback() {
+        $model = get_option('zhipu_ai_model', 'glm-4-flash-250414');
+        echo '<div class="provider-field zhipu">';
+        echo '<select name="zhipu_ai_model">';
+        echo '<option value="glm-4-flash-250414"' . selected($model, 'glm-4-flash-250414', false) . '>glm-4-flash-250414 (免费推荐)</option>';
+        echo '<option value="glm-4-plus"' . selected($model, 'glm-4-plus', false) . '>glm-4-plus (收费)</option>';
+        echo '<option value="glm-4-air-250414"' . selected($model, 'glm-4-air-250414', false) . '>glm-4-air-250414 (收费)</option>';
+        echo '<option value="glm-4-airx"' . selected($model, 'glm-4-airx', false) . '>glm-4-airx (收费)</option>';
+        echo '<option value="glm-4-long"' . selected($model, 'glm-4-long', false) . '>glm-4-long (收费)</option>';
+        echo '<option value="glm-4-flashx"' . selected($model, 'glm-4-flashx', false) . '>glm-4-flashx (收费)</option>';
+        echo '</select>';
+        echo '<p class="description">推荐使用 glm-4-flash-250414，该模型免费且性能优秀。其他模型为收费模型。</p>';
+        echo '</div>';
     }
     
     public function max_tokens_field_callback() {
         $max_tokens = get_option('deepseek_ai_max_tokens', 500);
+        echo '<div class="provider-field deepseek">';
         echo '<input type="number" name="deepseek_ai_max_tokens" value="' . esc_attr($max_tokens) . '" min="100" max="2000" />';
+        echo '</div>';
+    }
+    
+    public function zhipu_max_tokens_field_callback() {
+        $max_tokens = get_option('zhipu_ai_max_tokens', 500);
+        echo '<div class="provider-field zhipu">';
+        echo '<input type="number" name="zhipu_ai_max_tokens" value="' . esc_attr($max_tokens) . '" min="100" max="8000" />';
+        echo '<p class="description">智谱清言支持更大的Token数量</p>';
+        echo '</div>';
     }
     
     public function temperature_field_callback() {
         $temperature = get_option('deepseek_ai_temperature', 0.7);
+        echo '<div class="provider-field deepseek">';
         echo '<input type="number" name="deepseek_ai_temperature" value="' . esc_attr($temperature) . '" min="0" max="1" step="0.1" />';
+        echo '</div>';
+    }
+    
+    public function zhipu_temperature_field_callback() {
+        $temperature = get_option('zhipu_ai_temperature', 0.7);
+        echo '<div class="provider-field zhipu">';
+        echo '<input type="number" name="zhipu_ai_temperature" value="' . esc_attr($temperature) . '" min="0" max="1" step="0.1" />';
+        echo '<p class="description">控制输出的随机性，默认0.7</p>';
+        echo '</div>';
     }
     
     public function force_display_field_callback() {
@@ -477,8 +606,24 @@ class DeepSeekAI_Admin {
     
     private function add_debug_scripts() {
         ?>
+        <style type="text/css">
+        .provider-field {
+            display: none;
+        }
+        .provider-field.deepseek,
+        .provider-field.zhipu {
+            margin-top: 10px;
+        }
+        </style>
         <script type="text/javascript">
         jQuery(document).ready(function($) {
+            // AI服务提供商切换控制
+            $('#ai_provider_select').change(function() {
+                var provider = $(this).val();
+                $('.provider-field').hide();
+                $('.provider-field.' + provider).show();
+            }).trigger('change');
+            
             // 调试开关控制
             $('#debug_enabled_checkbox').change(function() {
                 if ($(this).is(':checked')) {

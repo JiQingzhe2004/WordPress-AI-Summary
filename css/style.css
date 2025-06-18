@@ -358,7 +358,6 @@
 
 .deepseek-ai-seo-fields {
     display: grid;
-    gap: 30px;
 }
 
 .deepseek-ai-seo-fields p {
@@ -392,7 +391,7 @@
     }
     
     .deepseek-ai-section {
-        padding: 25px;
+        padding: 15px;
     }
     
     .deepseek-ai-controls {
