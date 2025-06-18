@@ -1,17 +1,57 @@
 jQuery(document).ready(function($) {
     'use strict';
     
+    // 调试功能
+    const DEBUG = {
+        enabled: typeof deepseek_ai_ajax !== 'undefined' && deepseek_ai_ajax.debug_enabled,
+        frontend: typeof deepseek_ai_ajax !== 'undefined' && deepseek_ai_ajax.debug_frontend,
+        log: function(message, level = 'info') {
+            if (!this.enabled || !this.frontend) return;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = `[DeepSeek AI ${timestamp}]`;
+            
+            switch(level) {
+                case 'error':
+                    console.error(prefix, message);
+                    break;
+                case 'warn':
+                    console.warn(prefix, message);
+                    break;
+                case 'info':
+                    console.info(prefix, message);
+                    break;
+                default:
+                    console.log(prefix, message);
+            }
+        }
+    };
+    
     // 立即输出调试信息
-    console.log('DeepSeek AI 脚本已加载');
+    DEBUG.log('DeepSeek AI 脚本已加载');
     
     // 检查必要的变量是否存在
     if (typeof deepseek_ai_ajax === 'undefined') {
         console.error('deepseek_ai_ajax 未定义，请检查脚本加载');
-        return;
+        // 不要直接return，继续执行基本功能
+        console.log('继续执行基本脚本功能...');
+    } else {
+        DEBUG.log('deepseek_ai_ajax 变量已加载: ' + JSON.stringify({
+            ajax_url: deepseek_ai_ajax.ajax_url,
+            version: deepseek_ai_ajax.version,
+            debug_enabled: deepseek_ai_ajax.debug_enabled,
+            debug_frontend: deepseek_ai_ajax.debug_frontend
+        }));
     }
     
     // 美化控制台输出
     function logPluginInfo() {
+        // 只在调试模式下显示详细信息
+        if (!DEBUG.enabled || !DEBUG.frontend) {
+            DEBUG.log('插件信息输出已禁用（调试模式关闭）');
+            return;
+        }
+        
         const styles = {
             title: 'font-size: 20px; font-weight: bold; color: #2271b1; padding: 10px 0;',
             subtitle: 'font-size: 14px; color: #666; margin: 5px 0;',
@@ -35,7 +75,7 @@ jQuery(document).ready(function($) {
                 '%c' + pluginName + '\n' +
                 '%c版本: ' + pluginVersion + '\n' +
                 '%c作者: 吉庆喆\n' +
-                '%c状态: 运行中\n' +
+                '%c状态: 运行中（调试模式）\n' +
                 '%c功能: 自动生成文章摘要和SEO优化内容\n' +
                 '%c提示: 按 Ctrl+Shift+S 快速生成摘要\n' +
                 '%c提示: 按 Ctrl+Shift+E 快速生成SEO内容',
@@ -59,7 +99,9 @@ jQuery(document).ready(function($) {
                 'API连接': typeof deepseek_ai_ajax !== 'undefined',
                 '打字机效果': true,
                 'SEO优化': true,
-                '自动保存': true
+                '自动保存': true,
+                '调试模式': DEBUG.enabled,
+                '前端调试': DEBUG.frontend
             };
 
             console.log('%c功能状态检查:', styles.subtitle);
@@ -89,7 +131,7 @@ jQuery(document).ready(function($) {
             console.log(
                 '%c' + pluginName + '\n' +
                 '%c版本: ' + pluginVersion + '\n' +
-                '%c状态: 运行中',
+                '%c状态: 运行中（调试模式）',
                 styles.title,
                 styles.subtitle,
                 styles.success
@@ -103,13 +145,17 @@ jQuery(document).ready(function($) {
     // 获取当前文章ID
     function getCurrentPostId() {
         if (typeof window.pagenow !== 'undefined' && window.pagenow === 'post') {
-            return $('#post_ID').val();
+            const postId = $('#post_ID').val();
+            DEBUG.log('获取当前文章ID: ' + postId);
+            return postId;
         }
+        DEBUG.log('不在文章编辑页面，无法获取文章ID');
         return null;
     }
     
     // 显示成功消息
     function showSuccess(message, container) {
+        DEBUG.log('显示成功消息: ' + message);
         const successDiv = $('<div class="deepseek-ai-success deepseek-ai-fade-in"><i class="dashicons dashicons-yes"></i>' + message + '</div>');
         container.prepend(successDiv);
         setTimeout(() => {
@@ -121,6 +167,7 @@ jQuery(document).ready(function($) {
     
     // 显示错误消息
     function showError(message, container) {
+        DEBUG.log('显示错误消息: ' + message, 'error');
         const errorDiv = $('<div class="deepseek-ai-error deepseek-ai-fade-in"><i class="dashicons dashicons-no"></i>' + message + '</div>');
         container.prepend(errorDiv);
         setTimeout(() => {
@@ -132,6 +179,8 @@ jQuery(document).ready(function($) {
     
     // 流式输出效果
     function typeWriter(element, text, speed = 30) {
+        DEBUG.log('开始打字机效果，文本长度: ' + text.length + ', 速度: ' + speed);
+        
         const container = element.closest('.deepseek-ai-summary-container');
         const header = container.find('.deepseek-ai-summary-header');
         
@@ -159,31 +208,76 @@ jQuery(document).ready(function($) {
         }, speed);
     }
     
+    // 将typeWriter函数暴露到全局作用域
+    window.typeWriter = typeWriter;
+    
+    // HTML解码函数
+    function decodeHtmlEntities(text) {
+        if (!text) return text;
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = text;
+        return textarea.value;
+    }
+    
     // 前端摘要显示的流式效果
     function initSummaryTypewriter() {
+        DEBUG.log('初始化摘要打字机效果');
+        
         $('.deepseek-ai-summary-content').each(function() {
             const element = $(this);
-            const originalText = element.text().trim();
-            
+            // 优先从data属性中获取原始文本并解码HTML实体
+            let originalText = element.attr('data-original-text');
             if (originalText) {
+                originalText = decodeHtmlEntities(originalText);
+            }
+            
+            DEBUG.log('检查摘要元素，原始文本长度: ' + (originalText ? originalText.length : 0) + ', 已处理: ' + element.hasClass('typewriter-processed'));
+            
+            // 检查是否已经处理过打字机效果，并且有原始文本
+            if (originalText && originalText.trim() && !element.hasClass('typewriter-processed')) {
+                DEBUG.log('开始处理摘要打字机效果');
+                // 标记为已处理
+                element.addClass('typewriter-processed');
                 // 先清空内容
                 element.text('');
                 // 延迟一下再开始打字效果
                 setTimeout(() => {
                     typeWriter(element, originalText, 20);
                 }, 500);
+            } else if (!originalText || !originalText.trim()) {
+                DEBUG.log('摘要元素没有原始文本，跳过打字机效果', 'warn');
+                // 处理没有原始文本的情况，直接显示内容
+                if (element.text().trim() === '' && originalText) {
+                    element.text(originalText);
+                }
+            } else if (element.hasClass('typewriter-processed') && element.text().trim() === '') {
+                // 修复已处理但内容为空的情况
+                DEBUG.log('修复已处理但内容为空的摘要元素');
+                element.text(originalText);
             }
         });
     }
     
     // 在页面加载完成后初始化打字机效果
     $(document).ready(function() {
-        initSummaryTypewriter();
+        console.log('页面加载完成，开始初始化脚本');
+        
+        // 确保页面完全加载后再初始化打字机效果
+        setTimeout(function() {
+            DEBUG.log('延迟初始化打字机效果');
+            initSummaryTypewriter();
+        }, 1000);
+        
+        // 显示插件信息
+        logPluginInfo();
     });
     
-    // 监听动态加载的内容
+    // 监听动态加载的内容（仅在前端页面）
     $(document).on('ajaxComplete', function() {
-        initSummaryTypewriter();
+        DEBUG.log('AJAX完成，重新初始化前端打字机效果');
+        setTimeout(function() {
+            initSummaryTypewriter();
+        }, 500);
     });
     
     // 生成摘要
@@ -601,6 +695,156 @@ jQuery(document).ready(function($) {
         
         attempt();
     };
+    
+    // 在文章页面中自动检测并显示摘要
+    $(document).ready(function() {
+        // 立即执行一次
+        processArticleSummary();
+        
+        // 延迟执行以确保DOM完全加载和动态内容渲染
+        setTimeout(processArticleSummary, 500);
+        setTimeout(processArticleSummary, 1500);
+        
+        // 对于WordPress中常见的AJAX导航或Pjax加载
+        $(document).on('ajaxComplete ready post-load page-load', processArticleSummary);
+        
+        // 监听自定义摘要加载事件
+        $(document).on('deepseekAiSummaryLoaded', function() {
+            DEBUG.log('收到摘要加载事件通知，处理摘要');
+            processArticleSummary();
+        });
+    });
+    
+    // 处理页面加载和导航事件
+    $(window).on('load pageshow', function() {
+        DEBUG.log('页面加载完成或从缓存恢复，检查摘要显示');
+        processArticleSummary();
+        setTimeout(processArticleSummary, 1000);
+    });
+    
+    // MutationObserver监听DOM变化，处理AJAX加载的内容
+    if (window.MutationObserver) {
+        var observer = new MutationObserver(function(mutations) {
+            // 只有在变化比较多的情况下才处理，避免频繁执行
+            if (mutations.length > 2) {
+                DEBUG.log('检测到DOM变化，尝试处理摘要显示');
+                processArticleSummary();
+            }
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+    
+    // 处理文章摘要显示的核心函数
+    function processArticleSummary() {
+        // 仅在有摘要容器时执行
+        const containers = $('.deepseek-ai-summary-container');
+        if (containers.length) {
+            DEBUG.log('检测到文章页面的摘要容器，总数: ' + containers.length);
+            
+            // 查找所有摘要内容元素
+            containers.each(function() {
+                const container = $(this);
+                const element = container.find('.deepseek-ai-summary-content');
+                
+                if (element.length === 0) {
+                    DEBUG.log('未找到摘要内容元素', 'warn');
+                    return; // 跳过这个容器
+                }
+                
+                // 检查元素是否已经有内容或正在处理中
+                if (element.text().trim() !== '' || element.hasClass('processing')) {
+                    DEBUG.log('摘要内容已有或正在处理中，跳过');
+                    return; // 已有内容或正在处理，无需处理
+                }
+                
+                // 获取原始文本，优先从自身data属性获取
+                let originalText = element.attr('data-original-text');
+                
+                // 如果没有找到，尝试从父容器获取
+                if (!originalText || !originalText.trim()) {
+                    originalText = container.attr('data-summary');
+                }
+                
+                // 解码HTML实体
+                if (originalText) {
+                    originalText = decodeHtmlEntities(originalText);
+                }
+                
+                // 如果找到了文本，显示它
+                if (originalText && originalText.trim()) {
+                    DEBUG.log('找到摘要文本，长度: ' + originalText.length);
+                    
+                    // 标记为正在处理，避免重复处理
+                    element.addClass('processing');
+                    
+                    // 尝试使用打字机效果
+                    if (typeof window.typeWriter === 'function') {
+                        try {
+                            DEBUG.log('使用打字机效果显示摘要');
+                            typeWriter(element, originalText, 20);
+                        } catch (e) {
+                            // 打字机效果失败，直接显示文本
+                            DEBUG.log('打字机效果出错: ' + e.message, 'error');
+                            element.text(originalText).removeClass('processing').addClass('processed-error');
+                        }
+                    } else {
+                        // 打字机函数不可用，使用简单的JS实现
+                        DEBUG.log('打字机函数不可用，使用简易打字机效果');
+                        element.text(''); // 清空内容
+                        
+                        let i = 0;
+                        const text = originalText;
+                        const speed = 20;
+                        
+                        const timer = setInterval(function() {
+                            if (i < text.length) {
+                                element.text(element.text() + text.charAt(i));
+                                i++;
+                            } else {
+                                clearInterval(timer);
+                                element.removeClass('processing').addClass('processed');
+                            }
+                        }, speed);
+                    }
+                } else {
+                    DEBUG.log('未找到摘要文本', 'warn');
+                }
+            });
+        } else {
+            DEBUG.log('页面中没有摘要容器');
+        }
+    }
+    
+    // 滚动事件处理：当用户滚动到摘要位置时，确保摘要已显示
+    $(window).on('scroll', function() {
+        $('.deepseek-ai-summary-content').each(function() {
+            const element = $(this);
+            if (element.text().trim() === '' && isElementInViewport(element)) {
+                let originalText = element.attr('data-original-text') || 
+                                   element.closest('.deepseek-ai-summary-container').attr('data-summary');
+                if (originalText) {
+                    originalText = decodeHtmlEntities(originalText);
+                    DEBUG.log('用户滚动到摘要位置，显示摘要');
+                    element.text(originalText);
+                }
+            }
+        });
+    });
+    
+    // 检查元素是否在视口中
+    function isElementInViewport(el) {
+        const rect = el[0].getBoundingClientRect();
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        );
+    }
     
     console.log('DeepSeek AI Summarizer 插件已加载完成');
 });

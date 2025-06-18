@@ -1,5 +1,120 @@
 /* DeepSeek AI 插件样式 */
 
+/* 调试功能样式 */
+.deepseek-ai-debug-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 25px;
+    margin: 20px 0;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.deepseek-ai-debug-section h3 {
+    color: #00d4ff;
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.deepseek-ai-debug-controls {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+    flex-wrap: wrap;
+}
+
+.deepseek-ai-debug-btn {
+    background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.deepseek-ai-debug-btn:hover {
+    background: linear-gradient(135deg, #0099cc 0%, #007399 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+}
+
+.deepseek-ai-debug-btn.danger {
+    background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
+}
+
+.deepseek-ai-debug-btn.danger:hover {
+    background: linear-gradient(135deg, #ff3742 0%, #ff1e2d 100%);
+    box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
+}
+
+.deepseek-ai-debug-log {
+    background: #1a1a1a;
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    padding: 15px;
+    border-radius: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 15px 0;
+}
+
+.deepseek-ai-debug-log:empty::before {
+    content: '暂无调试日志...';
+    color: #666;
+    font-style: italic;
+}
+
+.deepseek-ai-debug-log .log-timestamp {
+    color: #888;
+}
+
+.deepseek-ai-debug-log .log-level-error {
+    color: #ff4757;
+}
+
+.deepseek-ai-debug-log .log-level-warning {
+    color: #ffa502;
+}
+
+.deepseek-ai-debug-log .log-level-info {
+    color: #70a1ff;
+}
+
+.deepseek-ai-debug-log .log-level-debug {
+    color: #7bed9f;
+}
+
+.deepseek-ai-debug-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-left: 10px;
+}
+
+.deepseek-ai-debug-status.enabled {
+    background: rgba(126, 237, 159, 0.2);
+    color: #7bed9f;
+    border: 1px solid #7bed9f;
+}
+
+.deepseek-ai-debug-status.disabled {
+    background: rgba(255, 71, 87, 0.2);
+    color: #ff4757;
+    border: 1px solid #ff4757;
+}
+
 /* 管理页面样式 */
 .deepseek-ai-settings {
     background: linear-gradient(135deg, #1a1f3c 0%, #2d3a6d 100%);
@@ -613,4 +728,61 @@
 .deepseek-ai-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0, 212, 255, 0.4);
+}
+
+/* 增强摘要容器和打字机效果的样式 */
+.deepseek-ai-loaded {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+.deepseek-ai-summary-content.processing::after {
+    content: '▎';
+    display: inline-block;
+    animation: blink 1s infinite;
+    color: #2271b1;
+    margin-left: 2px;
+}
+
+.deepseek-ai-summary-content.processed {
+    color: #333 !important;
+}
+
+.deepseek-ai-summary-content.processed-error {
+    color: #333 !important;
+    border-left: 2px solid #ff4757;
+    padding-left: 8px;
+}
+
+/* 确保摘要内容在任何情况下都能正常显示 */
+.deepseek-ai-summary-container {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+/* 修复在某些主题中可能存在的冲突 */
+.deepseek-ai-summary-container * {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+.deepseek-ai-icon {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    font-size: 18px;
+    line-height: 1;
+}
+
+/* 对摘要内容应用更好的文本渲染 */
+.deepseek-ai-content {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
 }

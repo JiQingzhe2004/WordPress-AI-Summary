@@ -3,7 +3,7 @@
  * 管理后台功能类
  *
  * @package DeepSeekAISummarizer
- * @since 2.1.0
+ * @since 2.3.0
  */
 
 // 防止直接访问
@@ -66,11 +66,49 @@ class DeepSeekAI_Admin {
             'default' => false
         ));
         
+        // 注册调试设置
+        register_setting('deepseek_ai_settings', 'deepseek_ai_debug_enabled', array(
+            'type' => 'boolean',
+            'sanitize_callback' => 'rest_sanitize_boolean',
+            'default' => false
+        ));
+        
+        register_setting('deepseek_ai_settings', 'deepseek_ai_debug_level', array(
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => 'info'
+        ));
+        
+        register_setting('deepseek_ai_settings', 'deepseek_ai_debug_frontend', array(
+            'type' => 'boolean',
+            'sanitize_callback' => 'rest_sanitize_boolean',
+            'default' => false
+        ));
+        
+        register_setting('deepseek_ai_settings', 'deepseek_ai_debug_ajax', array(
+            'type' => 'boolean',
+            'sanitize_callback' => 'rest_sanitize_boolean',
+            'default' => false
+        ));
+        
+        register_setting('deepseek_ai_settings', 'deepseek_ai_debug_api', array(
+            'type' => 'boolean',
+            'sanitize_callback' => 'rest_sanitize_boolean',
+            'default' => false
+        ));
+        
         // 添加设置节
         add_settings_section(
             'deepseek_ai_main_section',
             'API 设置',
             array($this, 'settings_section_callback'),
+            'deepseek-ai-settings'
+        );
+        
+        add_settings_section(
+            'deepseek_ai_debug_section',
+            '调试设置',
+            array($this, 'debug_section_callback'),
             'deepseek-ai-settings'
         );
         
@@ -114,10 +152,64 @@ class DeepSeekAI_Admin {
             'deepseek-ai-settings',
             'deepseek_ai_main_section'
         );
+        
+        // 添加调试设置字段
+        add_settings_field(
+            'deepseek_ai_debug_enabled',
+            '启用调试模式',
+            array($this, 'debug_enabled_field_callback'),
+            'deepseek-ai-settings',
+            'deepseek_ai_debug_section'
+        );
+        
+        add_settings_field(
+            'deepseek_ai_debug_level',
+            '调试级别',
+            array($this, 'debug_level_field_callback'),
+            'deepseek-ai-settings',
+            'deepseek_ai_debug_section'
+        );
+        
+        add_settings_field(
+            'deepseek_ai_debug_frontend',
+            '前端调试',
+            array($this, 'debug_frontend_field_callback'),
+            'deepseek-ai-settings',
+            'deepseek_ai_debug_section'
+        );
+        
+        add_settings_field(
+            'deepseek_ai_debug_ajax',
+            'AJAX调试',
+            array($this, 'debug_ajax_field_callback'),
+            'deepseek-ai-settings',
+            'deepseek_ai_debug_section'
+        );
+        
+        add_settings_field(
+            'deepseek_ai_debug_api',
+            'API调试',
+            array($this, 'debug_api_field_callback'),
+            'deepseek-ai-settings',
+            'deepseek_ai_debug_section'
+        );
+        
+        add_settings_field(
+            'deepseek_ai_debug_log_viewer',
+            '调试日志查看器',
+            array($this, 'debug_log_viewer_field_callback'),
+            'deepseek-ai-settings',
+            'deepseek_ai_debug_section'
+        );
     }
     
     public function settings_section_callback() {
         echo '<p>请配置爱奇吉摘要的API设置</p>';
+    }
+    
+    public function debug_section_callback() {
+        echo '<p>调试功能可以帮助您诊断插件问题和监控运行状态</p>';
+        echo '<div class="notice notice-warning inline"><p><strong>注意：</strong>调试模式会记录详细的运行信息，可能会影响性能。建议仅在需要时启用。</p></div>';
     }
     
     public function api_key_field_callback() {
@@ -150,6 +242,51 @@ class DeepSeekAI_Admin {
         echo '<p class="description">启用后，摘要将在所有支持的主题中强制显示，即使主题不完全兼容也能正常显示摘要内容</p>';
     }
     
+    public function debug_enabled_field_callback() {
+        $debug_enabled = get_option('deepseek_ai_debug_enabled', false);
+        echo '<input type="checkbox" name="deepseek_ai_debug_enabled" value="1" ' . checked(1, $debug_enabled, false) . ' id="debug_enabled_checkbox" />';
+        echo '<p class="description">启用调试模式将记录插件的详细运行信息</p>';
+    }
+    
+    public function debug_level_field_callback() {
+        $debug_level = get_option('deepseek_ai_debug_level', 'info');
+        echo '<select name="deepseek_ai_debug_level" id="debug_level_select">';
+        echo '<option value="debug"' . selected($debug_level, 'debug', false) . '>调试 (Debug) - 最详细</option>';
+        echo '<option value="info"' . selected($debug_level, 'info', false) . '>信息 (Info) - 一般信息</option>';
+        echo '<option value="warning"' . selected($debug_level, 'warning', false) . '>警告 (Warning) - 仅警告和错误</option>';
+        echo '<option value="error"' . selected($debug_level, 'error', false) . '>错误 (Error) - 仅错误</option>';
+        echo '</select>';
+        echo '<p class="description">选择要记录的日志级别</p>';
+    }
+    
+    public function debug_frontend_field_callback() {
+        $debug_frontend = get_option('deepseek_ai_debug_frontend', false);
+        echo '<input type="checkbox" name="deepseek_ai_debug_frontend" value="1" ' . checked(1, $debug_frontend, false) . ' class="debug_module_checkbox" />';
+        echo '<p class="description">记录前端相关的调试信息</p>';
+    }
+    
+    public function debug_ajax_field_callback() {
+        $debug_ajax = get_option('deepseek_ai_debug_ajax', false);
+        echo '<input type="checkbox" name="deepseek_ai_debug_ajax" value="1" ' . checked(1, $debug_ajax, false) . ' class="debug_module_checkbox" />';
+        echo '<p class="description">记录AJAX请求的调试信息</p>';
+    }
+    
+    public function debug_api_field_callback() {
+        $debug_api = get_option('deepseek_ai_debug_api', false);
+        echo '<input type="checkbox" name="deepseek_ai_debug_api" value="1" ' . checked(1, $debug_api, false) . ' class="debug_module_checkbox" />';
+        echo '<p class="description">记录API调用的调试信息</p>';
+    }
+    
+    public function debug_log_viewer_field_callback() {
+        echo '<div id="debug-log-viewer">';
+        echo '<button type="button" id="view-debug-log" class="button">查看调试日志</button> ';
+        echo '<button type="button" id="clear-debug-log" class="button">清空日志</button> ';
+        echo '<button type="button" id="download-debug-log" class="button">下载日志</button>';
+        echo '<div id="debug-log-content" style="display:none; margin-top:10px; padding:10px; background:#f9f9f9; border:1px solid #ddd; max-height:400px; overflow-y:auto; font-family:monospace; font-size:12px; white-space:pre-wrap;"></div>';
+        echo '</div>';
+        echo '<p class="description">查看、清空或下载调试日志文件</p>';
+    }
+    
     public function add_admin_menu() {
         add_menu_page(
             '爱奇吉摘要 设置',
@@ -164,17 +301,17 @@ class DeepSeekAI_Admin {
     
     public function enqueue_admin_scripts($hook) {
         // 添加调试日志
-        $this->plugin->write_log('当前页面钩子: ' . $hook);
+        $this->plugin->debug_log('当前页面钩子: ' . $hook);
         
         // 检查是否在文章编辑页面或设置页面
         if (in_array($hook, array('post.php', 'post-new.php', 'settings_page_deepseek-ai-settings'))) {
             // 加载样式
             wp_enqueue_style('deepseek-ai-admin', DEEPSEEK_AI_PLUGIN_URL . 'css/style.css', array(), $this->plugin->get_version());
-            $this->plugin->write_log('已加载管理页面样式文件: ' . DEEPSEEK_AI_PLUGIN_URL . 'css/style.css');
+            $this->plugin->debug_log('已加载管理页面样式文件: ' . DEEPSEEK_AI_PLUGIN_URL . 'css/style.css');
             
             // 加载脚本
             wp_enqueue_script('deepseek-ai-admin', DEEPSEEK_AI_PLUGIN_URL . 'js/scripts.js', array('jquery'), $this->plugin->get_version(), true);
-            $this->plugin->write_log('已加载管理页面脚本文件: ' . DEEPSEEK_AI_PLUGIN_URL . 'js/scripts.js');
+            $this->plugin->debug_log('已加载管理页面脚本文件: ' . DEEPSEEK_AI_PLUGIN_URL . 'js/scripts.js');
             
             // 本地化脚本
             wp_localize_script('deepseek-ai-admin', 'deepseek_ai_ajax', array(
@@ -184,9 +321,11 @@ class DeepSeekAI_Admin {
                 'error_text' => '生成失败，请检查API设置',
                 'plugin_url' => DEEPSEEK_AI_PLUGIN_URL,
                 'version' => $this->plugin->get_version(),
-                'plugin_name' => 'DeepSeek AI 文章摘要生成器'
+                'plugin_name' => 'DeepSeek AI 文章摘要生成器',
+                'debug_enabled' => $this->plugin->is_debug_enabled(),
+                'debug_level' => $this->plugin->get_debug_level()
             ));
-            $this->plugin->write_log('已本地化脚本数据，版本号: ' . $this->plugin->get_version());
+            $this->plugin->debug_log('已本地化脚本数据，版本号: ' . $this->plugin->get_version());
         }
     }
     
@@ -301,12 +440,17 @@ class DeepSeekAI_Admin {
         
         // 检查是否有设置更新
         if (isset($_GET['settings-updated'])) {
+            // 更新插件的调试设置
+            $this->plugin->update_debug_settings();
+            
             add_settings_error(
                 'deepseek_ai_messages',
                 'deepseek_ai_message',
                 '设置已保存',
                 'updated'
             );
+            
+            $this->plugin->info_log('插件设置已更新');
         }
         
         // 显示设置错误/更新消息
@@ -321,6 +465,79 @@ class DeepSeekAI_Admin {
         submit_button('保存设置');
         
         echo '</form>';
+        
+        // 添加调试相关的JavaScript
+        $this->add_debug_scripts();
+        
         echo '</div>';
+    }
+    
+    private function add_debug_scripts() {
+        ?>
+        <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            // 调试开关控制
+            $('#debug_enabled_checkbox').change(function() {
+                if ($(this).is(':checked')) {
+                    $('.debug_module_checkbox').prop('disabled', false);
+                    $('#debug_level_select').prop('disabled', false);
+                } else {
+                    $('.debug_module_checkbox').prop('disabled', true);
+                    $('#debug_level_select').prop('disabled', true);
+                }
+            }).trigger('change');
+            
+            // 查看调试日志
+            $('#view-debug-log').click(function() {
+                var $content = $('#debug-log-content');
+                if ($content.is(':visible')) {
+                    $content.hide();
+                    $(this).text('查看调试日志');
+                } else {
+                    $(this).text('正在加载...');
+                    $.post(deepseek_ai_ajax.ajax_url, {
+                        action: 'deepseek_ai_get_debug_log',
+                        nonce: deepseek_ai_ajax.nonce
+                    }, function(response) {
+                        if (response.success) {
+                            $content.text(response.data).show();
+                            $('#view-debug-log').text('隐藏日志');
+                        } else {
+                            alert('获取日志失败: ' + response.data);
+                            $('#view-debug-log').text('查看调试日志');
+                        }
+                    }).fail(function() {
+                        alert('请求失败');
+                        $('#view-debug-log').text('查看调试日志');
+                    });
+                }
+            });
+            
+            // 清空调试日志
+            $('#clear-debug-log').click(function() {
+                if (confirm('确定要清空调试日志吗？此操作不可恢复。')) {
+                    $.post(deepseek_ai_ajax.ajax_url, {
+                        action: 'deepseek_ai_clear_debug_log',
+                        nonce: deepseek_ai_ajax.nonce
+                    }, function(response) {
+                        if (response.success) {
+                            $('#debug-log-content').text('').hide();
+                            $('#view-debug-log').text('查看调试日志');
+                            alert('日志已清空');
+                        } else {
+                            alert('清空失败: ' + response.data);
+                        }
+                    });
+                }
+            });
+            
+            // 下载调试日志
+            $('#download-debug-log').click(function() {
+                var url = deepseek_ai_ajax.ajax_url + '?action=deepseek_ai_download_debug_log&nonce=' + deepseek_ai_ajax.nonce;
+                window.open(url, '_blank');
+            });
+        });
+        </script>
+        <?php
     }
 }
