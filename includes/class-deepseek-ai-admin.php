@@ -11,6 +11,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// 防止重复声明类
+if (!class_exists('DeepSeekAI_Admin')) {
+
 class DeepSeekAI_Admin {
     
     private $plugin;
@@ -541,3 +544,5 @@ class DeepSeekAI_Admin {
         <?php
     }
 }
+
+} // 结束 class_exists 检查

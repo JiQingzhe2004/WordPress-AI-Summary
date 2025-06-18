@@ -1,4 +1,4 @@
-=== Aiqiji Summary ===
+=== AiqijiSummary ===
 Contributors: JiQingzhe2004
 Tags: ai, summary, seo, content, automation
 Requires at least: 5.0

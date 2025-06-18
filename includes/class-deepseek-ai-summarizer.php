@@ -11,6 +11,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// 防止重复声明类
+if (!class_exists('DeepSeekAISummarizer')) {
+
 class DeepSeekAISummarizer {
     
     private $log_file;
@@ -250,3 +253,5 @@ class DeepSeekAISummarizer {
         $this->write_log('插件停用：清理完成');
     }
 }
+
+} // 结束 class_exists 检查

@@ -11,6 +11,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// 防止重复声明类
+if (!class_exists('DeepSeekAI_Ajax')) {
+
 class DeepSeekAI_Ajax {
     
     private $plugin;
@@ -158,3 +161,5 @@ class DeepSeekAI_Ajax {
         }
     }
 }
+
+} // 结束 class_exists 检查

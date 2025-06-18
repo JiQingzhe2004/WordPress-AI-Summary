@@ -1,6 +1,7 @@
 <?php
 /**
- * Plugin Name: Aiqiji Summary
+ * Plugin Name: AiqijiSummary
+ * Text Domain: 爱奇吉智能摘要
  * Plugin URI: https://github.com/JiQingzhe2004/WordPress-AI-Summary
  * Description: 使用爱奇吉摘要自动生成文章摘要和SEO优化内容，支持流式输出效果。
  * - 自动生成文章摘要
@@ -38,10 +39,16 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// 定义插件常量
-define('DEEPSEEK_AI_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('DEEPSEEK_AI_PLUGIN_PATH', plugin_dir_path(__FILE__));
-define('DEEPSEEK_AI_VERSION', '2.3.0');
+// 定义插件常量（避免重复定义）
+if (!defined('DEEPSEEK_AI_PLUGIN_URL')) {
+    define('DEEPSEEK_AI_PLUGIN_URL', plugin_dir_url(__FILE__));
+}
+if (!defined('DEEPSEEK_AI_PLUGIN_PATH')) {
+    define('DEEPSEEK_AI_PLUGIN_PATH', plugin_dir_path(__FILE__));
+}
+if (!defined('DEEPSEEK_AI_VERSION')) {
+    define('DEEPSEEK_AI_VERSION', '2.3.0');
+}
 
 // 加载主插件类
 require_once DEEPSEEK_AI_PLUGIN_PATH . 'includes/class-deepseek-ai-summarizer.php';

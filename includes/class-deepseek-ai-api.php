@@ -11,6 +11,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// 防止重复声明类
+if (!class_exists('DeepSeekAI_API')) {
+
 class DeepSeekAI_API {
     
     private $plugin;
@@ -186,3 +189,5 @@ class DeepSeekAI_API {
         }
     }
 }
+
+} // 结束 class_exists 检查
