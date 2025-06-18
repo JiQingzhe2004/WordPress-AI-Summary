@@ -3,7 +3,7 @@
  * AJAX处理功能类
  *
  * @package DeepSeekAISummarizer
- * @since 3.0.3
+ * @since 3.1.0
  */
 
 // 防止直接访问

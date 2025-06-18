@@ -3,7 +3,7 @@
  * 管理后台功能类
  *
  * @package DeepSeekAISummarizer
- * @since 3.0.3
+ * @since 3.1.0
  */
 
 // 防止直接访问
@@ -426,7 +426,7 @@ class DeepSeekAI_Admin {
             'manage_options',
             'deepseek-ai-settings',
             array($this, 'admin_page'),
-            plugins_url('img/deepseek-color.svg', dirname(__FILE__)),
+            plugins_url('img/cblogo.svg', dirname(__FILE__)),
             25
         );
     }
@@ -464,7 +464,7 @@ class DeepSeekAI_Admin {
     public function add_meta_boxes() {
         add_meta_box(
             'aiqiji-summary-generator',
-            '爱奇吉摘要 内容生成器',
+            '爱奇吉智能摘要',
             array($this, 'meta_box_callback'),
             'post',
             'normal',
@@ -488,6 +488,12 @@ class DeepSeekAI_Admin {
         $seo_keywords = get_post_meta($post->ID, '_deepseek_ai_seo_keywords', true);
         
         echo '<div class="deepseek-ai-meta-box">';
+        
+        // 添加LOGO头部
+        echo '<div class="deepseek-ai-header" style="display: flex; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #ddd;">';
+        echo '<img src="' . plugin_dir_url(dirname(__FILE__)) . 'img/logo.svg" alt="爱奇吉智能摘要"  />';
+        echo '<h2 style="margin: 0; color: #4D6BFE; font-size: 18px; font-weight: 600;">爱奇吉智能摘要</h2>';
+        echo '</div>';
         
         // 摘要部分
         echo '<div class="deepseek-ai-section">';
@@ -589,7 +595,16 @@ class DeepSeekAI_Admin {
         settings_errors('deepseek_ai_messages');
         
         echo '<div class="wrap">';
-        echo '<h1>' . esc_html(get_admin_page_title()) . '</h1>';
+        
+        // 添加LOGO头部
+        echo '<div class="deepseek-ai-settings-header" style="display: flex; align-items: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #1a1f3c 0%, #2d3a6d 100%); border-radius: 15px; color: white; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);">';
+        echo '<img src="' . plugin_dir_url(dirname(__FILE__)) . 'img/logo.svg" alt="爱奇吉智能摘要" style="width: 40px; height: 40px; margin-right: 15px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));" />';
+        echo '<div>';
+        echo '<h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);">' . esc_html(get_admin_page_title()) . '</h1>';
+        echo '<p style="margin: 5px 0 0 0; color: rgba(255, 255, 255, 0.8); font-size: 14px;">配置您的 AI 内容生成设置</p>';
+        echo '</div>';
+        echo '</div>';
+        
         echo '<form action="options.php" method="post">';
         
         settings_fields('deepseek_ai_settings');

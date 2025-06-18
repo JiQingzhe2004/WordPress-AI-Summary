@@ -193,6 +193,105 @@
     overflow: hidden;
 }
 
+/* LOGO头部样式 */
+.deepseek-ai-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 15px 20px;
+    transition: all 0.3s ease;
+}
+
+.deepseek-ai-header:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
+}
+
+.deepseek-ai-header img {
+    width: 40px;
+    height: 40px;
+    margin-right: 12px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease;
+}
+
+.deepseek-ai-header:hover img {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.deepseek-ai-header h2 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(45deg, #ffffff, #e0e7ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* 设置页面LOGO头部样式 */
+.deepseek-ai-settings-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #1a1f3c 0%, #2d3a6d 100%);
+    border-radius: 15px;
+    color: white;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.deepseek-ai-settings-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(77, 107, 254, 0.1) 0%, rgba(77, 107, 254, 0) 100%);
+    pointer-events: none;
+}
+
+.deepseek-ai-settings-header:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.deepseek-ai-settings-header img {
+    width: 32px;
+    height: 32px;
+    margin-right: 15px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease;
+}
+
+.deepseek-ai-settings-header:hover img {
+    transform: scale(1.1) rotate(10deg);
+}
+
+.deepseek-ai-settings-header h1 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.deepseek-ai-settings-header p {
+    margin: 5px 0 0 0;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+}
+
 .deepseek-ai-meta-box::before {
     content: '';
     position: absolute;
