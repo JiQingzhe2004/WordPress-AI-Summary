@@ -193,8 +193,8 @@ jQuery(document).ready(function($) {
         const originalText = text;
         
         // 判断元素类型，使用相应的方法设置内容
-        const isInput = element.is('input');
-        if (isInput) {
+        const isInputOrTextarea = element.is('input') || element.is('textarea');
+        if (isInputOrTextarea) {
             element.val('');
         } else {
             element.text('');
@@ -203,11 +203,13 @@ jQuery(document).ready(function($) {
         let i = 0;
         const timer = setInterval(() => {
             if (i < originalText.length) {
-                const currentText = isInput ? element.val() : element.text();
+                const currentText = isInputOrTextarea ? element.val() : element.text();
                 const newText = currentText + originalText.charAt(i);
                 
-                if (isInput) {
+                if (isInputOrTextarea) {
                     element.val(newText);
+                    // 触发input事件以更新字数统计
+                    element.trigger('input');
                 } else {
                     element.text(newText);
                 }
@@ -218,6 +220,11 @@ jQuery(document).ready(function($) {
                 container.removeClass('loading');
                 header.removeClass('loading');
                 element.removeClass('typing');
+                
+                // 确保最终触发input事件
+                if (isInputOrTextarea) {
+                    element.trigger('input');
+                }
             }
         }, speed);
     }
@@ -516,25 +523,34 @@ jQuery(document).ready(function($) {
         $('#deepseek-ai-summary').after('<div class="character-count" style="text-align: right; color: #666; font-size: 12px; margin-top: 5px;">字数: <span id="summary-count">0</span>/150</div>');
         $('#deepseek-ai-seo-description').after('<div class="character-count" style="text-align: right; color: #666; font-size: 12px; margin-top: 5px;">字数: <span id="description-count">0</span>/150</div>');
         
-        $('#deepseek-ai-summary').on('input', function() {
-            const count = $(this).val().length;
+        // 更新字数统计的函数
+        function updateSummaryCount() {
+            const count = $('#deepseek-ai-summary').val().length;
             $('#summary-count').text(count);
             if (count > 150) {
                 $('#summary-count').css('color', '#f44336');
             } else {
                 $('#summary-count').css('color', '#666');
             }
-        });
+        }
         
-        $('#deepseek-ai-seo-description').on('input', function() {
-            const count = $(this).val().length;
+        function updateDescriptionCount() {
+            const count = $('#deepseek-ai-seo-description').val().length;
             $('#description-count').text(count);
             if (count > 150) {
                 $('#description-count').css('color', '#f44336');
             } else {
                 $('#description-count').css('color', '#666');
             }
-        });
+        }
+        
+        // 绑定事件监听器
+        $('#deepseek-ai-summary').on('input', updateSummaryCount);
+        $('#deepseek-ai-seo-description').on('input', updateDescriptionCount);
+        
+        // 初始化显示当前字数
+        updateSummaryCount();
+        updateDescriptionCount();
     }
     
     // 初始化字数统计
