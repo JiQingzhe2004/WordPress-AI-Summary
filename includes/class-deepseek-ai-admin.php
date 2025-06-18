@@ -3,7 +3,7 @@
  * 管理后台功能类
  *
  * @package DeepSeekAISummarizer
- * @since 3.1.0
+ * @since 3.2.0
  */
 
 // 防止直接访问
@@ -427,7 +427,7 @@ class DeepSeekAI_Admin {
             'deepseek-ai-settings',
             array($this, 'admin_page'),
             plugins_url('img/cblogo.svg', dirname(__FILE__)),
-            25
+            null
         );
     }
     
