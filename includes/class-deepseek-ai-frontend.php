@@ -3,7 +3,7 @@
  * 前端显示功能类
  *
  * @package DeepSeekAISummarizer
- * @since 2.3.0
+ * @since 3.0.0
  */
 
 // 防止直接访问
@@ -139,7 +139,7 @@ class DeepSeekAI_Frontend {
                 'errorText' => esc_js(__('生成摘要时出错，请重试', '爱奇吉智能摘要')),
                 'plugin_url' => esc_url(DEEPSEEK_AI_PLUGIN_URL),
                 'version' => esc_attr($this->plugin->get_version()),
-                'plugin_name' => 'DeepSeek AI 文章摘要生成器',
+                'plugin_name' => '爱奇吉智能摘要',
                 'debug_enabled' => $this->plugin->get_debug_setting('debug_enabled'),
                 'debug_frontend' => $this->plugin->get_debug_setting('debug_frontend')
             ));

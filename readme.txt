@@ -3,7 +3,7 @@ Contributors: JiQingzhe2004
 Tags: ai, summary, seo, content, automation
 Requires at least: 5.0
 Tested up to: 6.5
-Stable tag: 2.3.0
+Stable tag: 3.0.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -53,7 +53,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 == 更新日志 ==
 
-= 2.3.0 =
+= 3.0.0 =
 * 优化流式输出效果
 * 改进摘要生成算法
 * 修复已知问题

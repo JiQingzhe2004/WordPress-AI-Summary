@@ -191,12 +191,26 @@ jQuery(document).ready(function($) {
         
         // 保存原始文本
         const originalText = text;
-        element.text('');
+        
+        // 判断元素类型，使用相应的方法设置内容
+        const isInput = element.is('input');
+        if (isInput) {
+            element.val('');
+        } else {
+            element.text('');
+        }
         
         let i = 0;
         const timer = setInterval(() => {
             if (i < originalText.length) {
-                element.text(element.text() + originalText.charAt(i));
+                const currentText = isInput ? element.val() : element.text();
+                const newText = currentText + originalText.charAt(i);
+                
+                if (isInput) {
+                    element.val(newText);
+                } else {
+                    element.text(newText);
+                }
                 i++;
             } else {
                 clearInterval(timer);
@@ -398,18 +412,6 @@ jQuery(document).ready(function($) {
         button.prop('disabled', true).text('生成中...');
         loadingDiv.show();
         
-        // 添加进度条
-        const progressBar = $('<div class="deepseek-ai-progress"><div class="deepseek-ai-progress-bar" style="width: 0%;"></div></div>');
-        loadingDiv.after(progressBar);
-        
-        // 模拟进度
-        let progress = 0;
-        const progressInterval = setInterval(() => {
-            progress += Math.random() * 12;
-            if (progress > 85) progress = 85;
-            progressBar.find('.deepseek-ai-progress-bar').css('width', progress + '%');
-        }, 250);
-        
         // AJAX请求
         $.ajax({
             url: deepseek_ai_ajax.ajax_url,
@@ -421,15 +423,6 @@ jQuery(document).ready(function($) {
             },
             timeout: 30000,
             success: function(response) {
-                clearInterval(progressInterval);
-                progressBar.find('.deepseek-ai-progress-bar').css('width', '100%');
-                
-                setTimeout(() => {
-                    progressBar.fadeOut(300, function() {
-                        $(this).remove();
-                    });
-                }, 500);
-                
                 if (response.success) {
                     const data = response.data;
                     
@@ -452,9 +445,6 @@ jQuery(document).ready(function($) {
                 }
             },
             error: function(xhr, status, error) {
-                clearInterval(progressInterval);
-                progressBar.remove();
-                
                 let errorMessage = '生成SEO内容失败';
                 if (status === 'timeout') {
                     errorMessage = '请求超时，请检查网络连接';
