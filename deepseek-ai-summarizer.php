@@ -1,12 +1,36 @@
 <?php
 /**
- * Plugin Name: 爱奇吉摘要
+ * Plugin Name: Aiqiji Summary
  * Plugin URI: https://github.com/JiQingzhe2004/WordPress-AI-Summary
- * Description: 使用爱奇吉摘要自动生成文章摘要和SEO优化内容，支持流式输出效果
+ * Description: 使用爱奇吉摘要自动生成文章摘要和SEO优化内容，支持流式输出效果。
+ * - 自动生成文章摘要
+ * - 支持流式打字机效果
+ * - SEO优化建议
+ * - 自定义摘要长度
+ * - 响应式设计
  * Version: 2.3.0
+ * Requires at least: 5.0
+ * Requires PHP: 7.4
  * Author: 吉庆喆
+ * Author URI: https://github.com/JiQingzhe2004
  * License: GPL v2 or later
- * Text Domain: deepseek-ai-summarizer
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * 
+ * @package DeepSeekAISummarizer
+ * @since 2.3.0
+ * 
+ * 爱奇吉摘要 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * any later version.
+ * 
+ * 爱奇吉摘要 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with 爱奇吉摘要. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
  */
 
 // 防止直接访问
