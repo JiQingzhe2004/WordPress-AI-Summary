@@ -405,16 +405,216 @@ class DeepSeekAI_Frontend {
              return;
          }
          
-         $summary = $this->get_summary($post_id);
-         if (!empty($summary)) {
-             // 清理HTML标签并截取适当长度
-             $description = wp_strip_all_tags($summary);
-             $description = wp_trim_words($description, 30, '...');
-             
-             echo '<meta name="description" content="' . esc_attr($description) . '">' . "\n";
-             echo '<meta property="og:description" content="' . esc_attr($description) . '">' . "\n";
-             echo '<meta name="twitter:description" content="' . esc_attr($description) . '">' . "\n";
+         // 获取SEO设置
+         $seo_title = get_post_meta($post_id, '_deepseek_ai_seo_title', true);
+         $seo_description = get_post_meta($post_id, '_deepseek_ai_seo_description', true);
+         $seo_keywords = get_post_meta($post_id, '_deepseek_ai_seo_keywords', true);
+         
+         // 获取社交标签设置
+         $social_title = get_post_meta($post_id, '_deepseek_ai_social_title', true);
+         $social_description = get_post_meta($post_id, '_deepseek_ai_social_description', true);
+         $social_image = get_post_meta($post_id, '_deepseek_ai_social_image', true);
+         $wechat_image = get_post_meta($post_id, '_deepseek_ai_wechat_image', true);
+         
+         // 控制台打印SEO数据（调试用）
+         //echo '<script type="text/javascript">';
+         //echo 'console.log("DeepSeek AI SEO 数据调试:");';
+         //echo 'console.log("文章ID: ' . esc_js($post_id) . '");';
+         //echo 'console.log("SEO标题: ' . esc_js($seo_title) . '");';
+         //echo 'console.log("SEO描述: ' . esc_js($seo_description) . '");';
+         //echo 'console.log("SEO关键词: ' . esc_js($seo_keywords) . '");';
+         //echo '</script>';
+         
+         // 如果没有设置SEO描述，使用摘要作为备选
+         if (empty($seo_description)) {
+             $summary = $this->get_summary($post_id);
+             if (!empty($summary)) {
+                 // 清理HTML标签并截取适当长度
+                 $seo_description = wp_strip_all_tags($summary);
+                 $seo_description = wp_trim_words($seo_description, 30, '...');
+             }
          }
+         
+         // 确定最终使用的标题和描述（优先使用社交标签设置）
+         $final_title = !empty($social_title) ? $social_title : $seo_title;
+         $final_description = !empty($social_description) ? $social_description : $seo_description;
+         
+         // 输出基础SEO标签
+         if (!empty($seo_title)) {
+             echo '<title>' . esc_html($seo_title) . '</title>' . "\n";
+         }
+         
+         if (!empty($seo_description)) {
+             echo '<meta name="description" content="' . esc_attr($seo_description) . '">' . "\n";
+         }
+         
+         if (!empty($seo_keywords)) {
+             echo '<meta name="keywords" content="' . esc_attr($seo_keywords) . '">' . "\n";
+         }
+         
+         // 输出Open Graph标签（用于Facebook等）
+         if (!empty($final_title)) {
+             echo '<meta property="og:title" content="' . esc_attr($final_title) . '">' . "\n";
+         }
+         
+         if (!empty($final_description)) {
+             echo '<meta property="og:description" content="' . esc_attr($final_description) . '">' . "\n";
+         }
+         
+         echo '<meta property="og:type" content="article">' . "\n";
+         echo '<meta property="og:url" content="' . esc_attr(get_permalink($post_id)) . '">' . "\n";
+         
+         // 输出Twitter Card标签
+         echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
+         
+         if (!empty($final_title)) {
+             echo '<meta name="twitter:title" content="' . esc_attr($final_title) . '">' . "\n";
+         }
+         
+         if (!empty($final_description)) {
+             echo '<meta name="twitter:description" content="' . esc_attr($final_description) . '">' . "\n";
+         }
+         
+         // 输出图片meta标签（优先级：社交图片 > 特色图片）
+         $image_url = '';
+         
+         if (!empty($social_image)) {
+             // 确保是完整的URL
+             $image_url = $this->ensure_absolute_url($social_image);
+         } elseif (has_post_thumbnail($post_id)) {
+             $image_url = get_the_post_thumbnail_url($post_id, 'large');
+         }
+         
+         if ($image_url) {
+             echo '<meta property="og:image" content="' . esc_attr($image_url) . '">' . "\n";
+             echo '<meta name="twitter:image" content="' . esc_attr($image_url) . '">' . "\n";
+         }
+         
+         // 微信分享专用标签
+         if (!empty($wechat_image)) {
+             // 确保微信图片也是完整的URL
+             $wechat_full_url = $this->ensure_absolute_url($wechat_image);
+             echo '<meta itemprop="image" content="' . esc_attr($wechat_full_url) . '">' . "\n";
+             echo '<meta name="weixin:image" content="' . esc_attr($wechat_full_url) . '">' . "\n";
+         }
+         
+         // 微信分享标题和描述
+         if (!empty($final_title)) {
+             echo '<meta name="weixin:title" content="' . esc_attr($final_title) . '">' . "\n";
+         }
+         
+         if (!empty($final_description)) {
+             echo '<meta name="weixin:description" content="' . esc_attr($final_description) . '">' . "\n";
+         }
+         
+         // 添加结构化数据 (JSON-LD)
+         $this->add_structured_data($post_id, $final_title, $final_description, $seo_keywords, $image_url);
+     }
+     
+     /**
+      * 添加结构化数据 (JSON-LD)
+      */
+     private function add_structured_data($post_id, $seo_title = '', $seo_description = '', $seo_keywords = '', $image_url = '') {
+         $post = get_post($post_id);
+         if (!$post) {
+             return;
+         }
+         
+         // 获取文章基本信息
+         $title = !empty($seo_title) ? $seo_title : get_the_title($post_id);
+         $description = !empty($seo_description) ? $seo_description : wp_trim_words(wp_strip_all_tags($post->post_content), 30, '...');
+         $url = get_permalink($post_id);
+         $date_published = get_the_date('c', $post_id);
+         $date_modified = get_the_modified_date('c', $post_id);
+         
+         // 获取作者信息
+         $author = get_userdata($post->post_author);
+         $author_name = $author ? $author->display_name : get_bloginfo('name');
+         
+         // 获取网站信息
+         $site_name = get_bloginfo('name');
+         $site_url = home_url();
+         
+         // 构建结构化数据
+         $structured_data = array(
+             '@context' => 'https://schema.org',
+             '@type' => 'Article',
+             'headline' => $title,
+             'description' => $description,
+             'url' => $url,
+             'datePublished' => $date_published,
+             'dateModified' => $date_modified,
+             'author' => array(
+                 '@type' => 'Person',
+                 'name' => $author_name
+             ),
+             'publisher' => array(
+                 '@type' => 'Organization',
+                 'name' => $site_name,
+                 'url' => $site_url
+             )
+         );
+         
+         // 添加图片（优先使用传入的图片URL）
+         if (!empty($image_url)) {
+             $structured_data['image'] = array(
+                 '@type' => 'ImageObject',
+                 'url' => $image_url
+             );
+         } elseif (has_post_thumbnail($post_id)) {
+             $thumbnail_url = get_the_post_thumbnail_url($post_id, 'large');
+             if ($thumbnail_url) {
+                 $structured_data['image'] = array(
+                     '@type' => 'ImageObject',
+                     'url' => $thumbnail_url
+                 );
+             }
+         }
+         
+         // 添加关键词
+         if (!empty($seo_keywords)) {
+             $keywords_array = array_map('trim', explode(',', $seo_keywords));
+             $structured_data['keywords'] = $keywords_array;
+         }
+         
+         // 添加文章分类
+         $categories = get_the_category($post_id);
+         if (!empty($categories)) {
+             $structured_data['articleSection'] = $categories[0]->name;
+         }
+         
+         // 输出结构化数据
+         echo '<script type="application/ld+json">' . "\n";
+         echo wp_json_encode($structured_data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n";
+         echo '</script>' . "\n";
+     }
+     
+     /**
+      * 确保URL是绝对链接
+      */
+     private function ensure_absolute_url($url) {
+         if (empty($url)) {
+             return '';
+         }
+         
+         // 如果已经是完整的URL，直接返回
+         if (filter_var($url, FILTER_VALIDATE_URL)) {
+             return $url;
+         }
+         
+         // 如果是相对路径，转换为绝对路径
+         if (strpos($url, '/') === 0) {
+             return home_url($url);
+         }
+         
+         // 如果是WordPress上传目录的相对路径
+         $upload_dir = wp_upload_dir();
+         if (strpos($url, $upload_dir['subdir']) !== false || strpos($url, basename($upload_dir['basedir'])) !== false) {
+             return $upload_dir['baseurl'] . '/' . ltrim($url, '/');
+         }
+         
+         // 默认情况下，假设是相对于网站根目录的路径
+         return home_url('/' . ltrim($url, '/'));
      }
      
      /**

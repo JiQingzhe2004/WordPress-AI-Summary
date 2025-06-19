@@ -107,25 +107,25 @@ jQuery(document).ready(function($) {
             console.log('%c功能状态检查:', styles.subtitle);
             Object.entries(features).forEach(([feature, status]) => {
                 console.log(
-                    `%c${feature}: %c${status ? '✓' : '✗'}`,
-                    styles.info,
-                    status ? styles.success : styles.error
-                );
-            });
-
-            // 添加使用提示
-            console.log(
-                '%c使用提示:\n' +
-                '%c1. 在文章编辑页面可以生成摘要和SEO内容\n' +
-                '%c2. 摘要会自动同步到WordPress原生摘要字段\n' +
-                '%c3. SEO内容会自动添加到文章头部\n' +
-                '%c4. 所有内容都支持打字机效果展示',
-                styles.subtitle,
+                `%c${feature}: %c${status ? '✓' : '✗'}`,
                 styles.info,
-                styles.info,
-                styles.info,
-                styles.info
+                status ? styles.success : styles.error
             );
+        });
+        
+        // 添加使用提示
+        console.log(
+            '%c使用提示:\n' +
+            '%c1. 在文章编辑页面可以生成摘要和SEO内容\n' +
+            '%c2. 摘要会自动同步到WordPress原生摘要字段\n' +
+            '%c3. SEO内容会自动添加到文章头部\n' +
+            '%c4. 所有内容都支持打字机效果展示',
+            styles.subtitle,
+            styles.info,
+            styles.info,
+            styles.info,
+            styles.info
+        );
         } else {
             // 文章展示页面只显示简单信息
             console.log(
@@ -138,6 +138,167 @@ jQuery(document).ready(function($) {
             );
         }
     }
+    
+    // 社交标签图片上传功能
+    function initImageUpload() {
+        console.log('=== initImageUpload 函数开始 ===');
+        console.log('开始初始化图片上传功能');
+        
+        var socialBtn = $('#upload-social-image');
+        var wechatBtn = $('#upload-wechat-image');
+        
+        console.log('找到的上传按钮: #upload-social-image =', socialBtn.length);
+        console.log('找到的上传按钮: #upload-wechat-image =', wechatBtn.length);
+        
+        if (socialBtn.length === 0) {
+            console.error('未找到社交图片上传按钮！');
+        }
+        if (wechatBtn.length === 0) {
+            console.error('未找到微信图片上传按钮！');
+        }
+        
+        // 通用社交分享图片上传
+        console.log('开始绑定社交图片上传按钮事件');
+        socialBtn.off('click').on('click', function(e) {
+            console.log('=== 社交图片上传按钮被点击 ===');
+            e.preventDefault();
+            console.log('事件默认行为已阻止');
+            DEBUG.log('点击了社交图片上传按钮');
+            
+            var mediaUploader = wp.media({
+                title: '选择社交分享图片',
+                button: {
+                    text: '使用此图片'
+                },
+                multiple: false,
+                library: {
+                    type: 'image'
+                }
+            });
+            
+            mediaUploader.on('select', function() {
+                console.log('用户选择了社交图片');
+                var attachment = mediaUploader.state().get('selection').first().toJSON();
+                console.log('选择的图片信息:', attachment);
+                $('#deepseek-ai-social-image').val(attachment.url);
+                $('#social-image-preview').html('<img src="' + attachment.url + '" style="max-width: 200px; height: auto; border: 1px solid #ddd; border-radius: 4px;" />');
+                $('#remove-social-image').show();
+                console.log('社交图片设置完成');
+            });
+            
+            console.log('打开媒体库选择器');
+            mediaUploader.open();
+        });
+        
+        // 移除通用社交分享图片
+        $('#remove-social-image').on('click', function(e) {
+            e.preventDefault();
+            $('#deepseek-ai-social-image').val('');
+            $('#social-image-preview').html('');
+            $(this).hide();
+        });
+        
+        // 微信分享图片上传
+        console.log('开始绑定微信图片上传按钮事件');
+        wechatBtn.off('click').on('click', function(e) {
+            console.log('=== 微信图片上传按钮被点击 ===');
+            e.preventDefault();
+            console.log('事件默认行为已阻止');
+            DEBUG.log('点击了微信图片上传按钮');
+            
+            var mediaUploader = wp.media({
+                title: '选择微信分享图片',
+                button: {
+                    text: '使用此图片'
+                },
+                multiple: false,
+                library: {
+                    type: 'image'
+                }
+            });
+            
+            mediaUploader.on('select', function() {
+                console.log('用户选择了微信图片');
+                var attachment = mediaUploader.state().get('selection').first().toJSON();
+                console.log('选择的图片信息:', attachment);
+                $('#deepseek-ai-wechat-image').val(attachment.url);
+                $('#wechat-image-preview').html('<img src="' + attachment.url + '" style="max-width: 200px; height: auto; border: 1px solid #ddd; border-radius: 4px;" />');
+                $('#remove-wechat-image').show();
+                console.log('微信图片设置完成');
+            });
+            
+            console.log('打开媒体库选择器');
+            mediaUploader.open();
+        });
+        
+        // 移除微信分享图片
+        $('#remove-wechat-image').on('click', function(e) {
+            e.preventDefault();
+            $('#deepseek-ai-wechat-image').val('');
+            $('#wechat-image-preview').html('');
+            $(this).hide();
+        });
+        
+        console.log('=== 事件绑定完成 ===');
+        
+        console.log('=== initImageUpload 函数结束 ===');
+    }
+    
+    // 在文档加载完成后初始化图片上传功能
+    $(document).ready(function() {
+        console.log('=== 图片上传功能调试开始 ===');
+        console.log('文档加载完成，开始检查图片上传功能');
+        console.log('jQuery版本:', $.fn.jquery);
+        console.log('wp对象存在:', typeof wp !== 'undefined');
+        console.log('wp.media存在:', typeof wp !== 'undefined' && typeof wp.media !== 'undefined');
+        console.log('当前页面URL:', window.location.href);
+        console.log('页面标题:', document.title);
+        
+        // 检查按钮是否存在
+        var socialBtn = $('#upload-social-image');
+        var wechatBtn = $('#upload-wechat-image');
+        console.log('社交图片上传按钮数量:', socialBtn.length);
+        console.log('微信图片上传按钮数量:', wechatBtn.length);
+        
+        if (socialBtn.length > 0) {
+            console.log('社交图片按钮HTML:', socialBtn[0].outerHTML);
+        }
+        if (wechatBtn.length > 0) {
+            console.log('微信图片按钮HTML:', wechatBtn[0].outerHTML);
+        }
+        
+        // 检查meta box是否存在
+        var metaBox = $('#aiqiji-summary-generator');
+        console.log('Meta box存在:', metaBox.length > 0);
+        if (metaBox.length > 0) {
+            console.log('Meta box可见:', metaBox.is(':visible'));
+        }
+        
+        if (typeof wp !== 'undefined' && wp.media) {
+            console.log('WordPress媒体库可用，开始初始化');
+            initImageUpload();
+            DEBUG.log('社交标签图片上传功能已初始化');
+        } else {
+            console.log('WordPress媒体库未加载，开始延迟重试');
+            DEBUG.log('WordPress媒体库未加载，图片上传功能不可用', 'warn');
+            // 延迟重试
+            setTimeout(function() {
+                console.log('=== 延迟重试检查 ===');
+                console.log('wp对象存在:', typeof wp !== 'undefined');
+                console.log('wp.media存在:', typeof wp !== 'undefined' && typeof wp.media !== 'undefined');
+                
+                if (typeof wp !== 'undefined' && wp.media) {
+                    console.log('延迟重试成功，开始初始化');
+                    initImageUpload();
+                    DEBUG.log('延迟初始化图片上传功能成功');
+                } else {
+                    console.log('延迟重试失败，媒体库仍未加载');
+                    DEBUG.log('延迟初始化失败，媒体库仍未加载', 'error');
+                }
+            }, 1000);
+        }
+        console.log('=== 图片上传功能调试结束 ===');
+    });
 
     // 在页面加载完成后显示插件信息
     logPluginInfo();

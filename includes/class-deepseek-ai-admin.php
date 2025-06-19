@@ -441,6 +441,12 @@ class DeepSeekAI_Admin {
             wp_enqueue_style('deepseek-ai-admin', DEEPSEEK_AI_PLUGIN_URL . 'css/style.css', array(), $this->plugin->get_version());
             $this->plugin->debug_log('已加载管理页面样式文件: ' . DEEPSEEK_AI_PLUGIN_URL . 'css/style.css');
             
+            // 加载WordPress媒体库（用于图片上传）
+            if (in_array($hook, array('post.php', 'post-new.php'))) {
+                wp_enqueue_media();
+                $this->plugin->debug_log('已加载WordPress媒体库');
+            }
+            
             // 加载脚本
             wp_enqueue_script('deepseek-ai-admin', DEEPSEEK_AI_PLUGIN_URL . 'js/scripts.js', array('jquery'), $this->plugin->get_version(), true);
             $this->plugin->debug_log('已加载管理页面脚本文件: ' . DEEPSEEK_AI_PLUGIN_URL . 'js/scripts.js');
@@ -529,7 +535,55 @@ class DeepSeekAI_Admin {
         echo '</div>';
         
         echo '</div>';
+        
+        // 社交标签部分
+        $social_title = get_post_meta($post->ID, '_deepseek_ai_social_title', true);
+        $social_description = get_post_meta($post->ID, '_deepseek_ai_social_description', true);
+        $social_image = get_post_meta($post->ID, '_deepseek_ai_social_image', true);
+        $wechat_image = get_post_meta($post->ID, '_deepseek_ai_wechat_image', true);
+        
+        echo '<div class="deepseek-ai-section">';
+        echo '<h3><i class="dashicons dashicons-share"></i> 社交媒体标签</h3>';
+        echo '<p class="description">设置在社交媒体平台分享时显示的内容</p>';
+        
+        echo '<div class="deepseek-ai-social-fields">';
+        echo '<p><label for="deepseek-ai-social-title">社交分享标题:</label></p>';
+        echo '<input type="text" name="deepseek_ai_social_title" id="deepseek-ai-social-title" value="' . esc_attr($social_title) . '" style="width:100%;" placeholder="留空则使用SEO标题或文章标题" />';
+        echo '<p class="description">用于社交媒体分享的标题，如微信、微博等</p>';
+        
+        echo '<p><label for="deepseek-ai-social-description">社交分享描述:</label></p>';
+        echo '<textarea name="deepseek_ai_social_description" id="deepseek-ai-social-description" rows="3" style="width:100%;" placeholder="留空则使用SEO描述或文章摘要">' . esc_textarea($social_description) . '</textarea>';
+        echo '<p class="description">用于社交媒体分享的描述，建议简洁有吸引力</p>';
+        
+        echo '<p><label for="deepseek-ai-social-image">通用社交分享图片:</label></p>';
+        echo '<div class="deepseek-ai-image-upload">';
+        echo '<input type="hidden" name="deepseek_ai_social_image" id="deepseek-ai-social-image" value="' . esc_attr($social_image) . '" />';
+        echo '<div class="image-preview" id="social-image-preview">';
+        if ($social_image) {
+            echo '<img src="' . esc_url($social_image) . '" style="max-width: 200px; height: auto; border: 1px solid #ddd; border-radius: 4px;" />';
+        }
         echo '</div>';
+        echo '<button type="button" class="button" id="upload-social-image">选择图片</button>';
+        echo '<button type="button" class="button" id="remove-social-image"' . ($social_image ? ' style="margin-left: 10px;"' : ' style="margin-left: 10px; display:none;"') . '>移除图片</button>';
+        echo '<p class="description">推荐尺寸: 1200x630px，用于Facebook、Twitter等平台</p>';
+        echo '</div>';
+        
+        echo '<p><label for="deepseek-ai-wechat-image">微信分享专用图片:</label></p>';
+        echo '<div class="deepseek-ai-image-upload">';
+        echo '<input type="hidden" name="deepseek_ai_wechat_image" id="deepseek-ai-wechat-image" value="' . esc_attr($wechat_image) . '" />';
+        echo '<div class="image-preview" id="wechat-image-preview">';
+        if ($wechat_image) {
+            echo '<img src="' . esc_url($wechat_image) . '" style="max-width: 200px; height: auto; border: 1px solid #ddd; border-radius: 4px;" />';
+        }
+        echo '</div>';
+        echo '<button type="button" class="button" id="upload-wechat-image">选择图片</button>';
+        echo '<button type="button" class="button" id="remove-wechat-image"' . ($wechat_image ? ' style="margin-left: 10px;"' : ' style="margin-left: 10px; display:none;"') . '>移除图片</button>';
+        echo '<p class="description">推荐尺寸: 300x300px，专门用于微信分享显示</p>';
+        echo '</div>';
+        
+        echo '</div>';
+         echo '</div>';
+         echo '</div>';
     }
     
     public function save_post_meta($post_id) {
@@ -568,6 +622,23 @@ class DeepSeekAI_Admin {
         
         if (isset($_POST['deepseek_ai_seo_keywords'])) {
             update_post_meta($post_id, '_deepseek_ai_seo_keywords', sanitize_text_field($_POST['deepseek_ai_seo_keywords']));
+        }
+        
+        // 保存社交标签数据
+        if (isset($_POST['deepseek_ai_social_title'])) {
+            update_post_meta($post_id, '_deepseek_ai_social_title', sanitize_text_field($_POST['deepseek_ai_social_title']));
+        }
+        
+        if (isset($_POST['deepseek_ai_social_description'])) {
+            update_post_meta($post_id, '_deepseek_ai_social_description', sanitize_textarea_field($_POST['deepseek_ai_social_description']));
+        }
+        
+        if (isset($_POST['deepseek_ai_social_image'])) {
+            update_post_meta($post_id, '_deepseek_ai_social_image', esc_url_raw($_POST['deepseek_ai_social_image']));
+        }
+        
+        if (isset($_POST['deepseek_ai_wechat_image'])) {
+            update_post_meta($post_id, '_deepseek_ai_wechat_image', esc_url_raw($_POST['deepseek_ai_wechat_image']));
         }
     }
     
