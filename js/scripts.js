@@ -1,6 +1,30 @@
 jQuery(document).ready(function($) {
     'use strict';
     
+    // 创建独立的jQuery实例，但保留全局jQuery供WordPress使用
+    const $deepseek = jQuery.noConflict();
+    
+    // 在我们的作用域内使用独立实例，但不影响全局jQuery
+    $ = $deepseek;
+    
+    // 确保WordPress媒体库能正常访问jQuery
+    if (typeof window.jQuery === 'undefined') {
+        window.jQuery = $deepseek;
+    }
+    
+    // 设置事件命名空间，避免与主题事件冲突
+    const DEEPSEEK_EVENT_NS = '.deepseekAI';
+    
+    // 阻止事件冒泡的通用函数
+    function stopEventPropagation(e) {
+        if (e && typeof e.stopPropagation === 'function') {
+            e.stopPropagation();
+        }
+        if (e && typeof e.stopImmediatePropagation === 'function') {
+            e.stopImmediatePropagation();
+        }
+    }
+    
     // 调试功能
     const DEBUG = {
         enabled: typeof deepseek_ai_ajax !== 'undefined' && deepseek_ai_ajax.debug_enabled,
@@ -29,6 +53,44 @@ jQuery(document).ready(function($) {
     
     // 立即输出调试信息
     DEBUG.log('DeepSeek AI 脚本已加载');
+    
+    // 防止与主题和其他插件的tinyMCE代码冲突
+    if (typeof window.deepseekAITinyMCEProtection === 'undefined') {
+        window.deepseekAITinyMCEProtection = true;
+        
+        // 创建独立的命名空间，避免全局污染
+        window.DeepSeekAI = window.DeepSeekAI || {};
+        window.DeepSeekAI.safeMode = true;
+        
+        // 保护性检查，避免访问未初始化的tinyMCE编辑器
+        const originalTinyMCEGet = window.tinymce && window.tinymce.get;
+        if (originalTinyMCEGet) {
+            // 不直接修改全局tinymce对象，而是创建安全的访问方法
+            window.DeepSeekAI.safeTinyMCEGet = function(id) {
+                try {
+                    if (typeof window.tinymce === 'undefined' || !window.tinymce.get) {
+                        return null;
+                    }
+                    const editor = originalTinyMCEGet.call(window.tinymce, id);
+                    // 确保编辑器已完全初始化且不为空
+                    if (editor && editor.initialized !== false && typeof editor.getContent === 'function') {
+                        return editor;
+                    }
+                    return null;
+                } catch (e) {
+                    DEBUG.log('TinyMCE编辑器获取失败: ' + e.message, 'warn');
+                    return null;
+                }
+            };
+        } else {
+            window.DeepSeekAI.safeTinyMCEGet = function() { return null; };
+        }
+        
+        // 延迟执行，确保主题代码先加载
+        setTimeout(function() {
+            DEBUG.log('DeepSeek AI 安全模式已启用，与主题隔离完成');
+        }, 100);
+    }
     
     // 检查必要的变量是否存在
     if (typeof deepseek_ai_ajax === 'undefined') {
@@ -139,13 +201,35 @@ jQuery(document).ready(function($) {
         }
     }
     
-    // 社交标签图片上传功能
-    function initImageUpload() {
-        console.log('=== initImageUpload 函数开始 ===');
+    // 确保DeepSeek AI 命名空间已初始化（前面已创建，这里确保存在）
+    window.DeepSeekAI = window.DeepSeekAI || {};
+    
+    // 添加事件隔离工具
+    window.DeepSeekAI.eventUtils = {
+        namespace: DEEPSEEK_EVENT_NS,
+        stopPropagation: stopEventPropagation,
+        safeEventBind: function(element, event, handler) {
+            element.off(event + DEEPSEEK_EVENT_NS).on(event + DEEPSEEK_EVENT_NS, function(e) {
+                stopEventPropagation(e);
+                return handler.call(this, e);
+            });
+        }
+    };
+    
+    // 社交标签图片上传功能 - 使用命名空间隔离
+    DeepSeekAI.initImageUpload = function() {
+        console.log('=== DeepSeek AI initImageUpload 函数开始 ===');
         console.log('开始初始化图片上传功能');
         
-        var socialBtn = $('#upload-social-image');
-        var wechatBtn = $('#upload-wechat-image');
+        // 使用更具体的选择器，避免与其他插件冲突
+        var $container = $('.deepseek-ai-meta-box');
+        if ($container.length === 0) {
+            console.log('DeepSeek AI meta box 不存在，跳过图片上传初始化');
+            return;
+        }
+        
+        var socialBtn = $container.find('#upload-social-image');
+        var wechatBtn = $container.find('#upload-wechat-image');
         
         console.log('找到的上传按钮: #upload-social-image =', socialBtn.length);
         console.log('找到的上传按钮: #upload-wechat-image =', wechatBtn.length);
@@ -157,32 +241,43 @@ jQuery(document).ready(function($) {
             console.error('未找到微信图片上传按钮！');
         }
         
-        // 通用社交分享图片上传
+        // 检查WordPress媒体库是否可用
+        if (typeof wp === 'undefined' || typeof wp.media === 'undefined') {
+            console.error('WordPress 媒体库不可用');
+            return;
+        }
+        
+        // 通用社交分享图片上传 - 使用安全事件绑定
         console.log('开始绑定社交图片上传按钮事件');
-        socialBtn.off('click').on('click', function(e) {
+        window.DeepSeekAI.eventUtils.safeEventBind(socialBtn, 'click', function(e) {
             console.log('=== 社交图片上传按钮被点击 ===');
             e.preventDefault();
-            console.log('事件默认行为已阻止');
+            console.log('事件默认行为已阻止，事件冒泡已阻止');
             DEBUG.log('点击了社交图片上传按钮');
             
+            // 创建独立的媒体上传器实例，避免与其他插件共享
             var mediaUploader = wp.media({
-                title: '选择社交分享图片',
+                title: 'DeepSeek AI - 选择社交分享图片',
                 button: {
                     text: '使用此图片'
                 },
                 multiple: false,
                 library: {
                     type: 'image'
-                }
+                },
+                frame: 'select' // 明确指定frame类型
             });
+            
+            // 清除之前的事件监听器，避免重复绑定
+            mediaUploader.off('select');
             
             mediaUploader.on('select', function() {
                 console.log('用户选择了社交图片');
                 var attachment = mediaUploader.state().get('selection').first().toJSON();
                 console.log('选择的图片信息:', attachment);
-                $('#deepseek-ai-social-image').val(attachment.url);
-                $('#social-image-preview').html('<img src="' + attachment.url + '" style="max-width: 200px; height: auto; border: 1px solid #ddd; border-radius: 4px;" />');
-                $('#remove-social-image').show();
+                $container.find('#deepseek-ai-social-image').val(attachment.url);
+                $container.find('#social-image-preview').html('<img src="' + attachment.url + '" style="max-width: 200px; height: auto; border: 1px solid #ddd; border-radius: 4px;" />');
+                $container.find('#remove-social-image').show();
                 console.log('社交图片设置完成');
             });
             
@@ -190,40 +285,45 @@ jQuery(document).ready(function($) {
             mediaUploader.open();
         });
         
-        // 移除通用社交分享图片
-        $('#remove-social-image').on('click', function(e) {
+        // 移除通用社交分享图片 - 使用安全事件绑定
+        window.DeepSeekAI.eventUtils.safeEventBind($container.find('#remove-social-image'), 'click', function(e) {
             e.preventDefault();
-            $('#deepseek-ai-social-image').val('');
-            $('#social-image-preview').html('');
+            $container.find('#deepseek-ai-social-image').val('');
+            $container.find('#social-image-preview').html('');
             $(this).hide();
         });
         
-        // 微信分享图片上传
+        // 微信分享图片上传 - 使用安全事件绑定
         console.log('开始绑定微信图片上传按钮事件');
-        wechatBtn.off('click').on('click', function(e) {
+        window.DeepSeekAI.eventUtils.safeEventBind(wechatBtn, 'click', function(e) {
             console.log('=== 微信图片上传按钮被点击 ===');
             e.preventDefault();
-            console.log('事件默认行为已阻止');
+            console.log('事件默认行为已阻止，事件冒泡已阻止');
             DEBUG.log('点击了微信图片上传按钮');
             
+            // 创建独立的媒体上传器实例，避免与其他插件共享
             var mediaUploader = wp.media({
-                title: '选择微信分享图片',
+                title: 'DeepSeek AI - 选择微信分享图片',
                 button: {
                     text: '使用此图片'
                 },
                 multiple: false,
                 library: {
                     type: 'image'
-                }
+                },
+                frame: 'select' // 明确指定frame类型
             });
+            
+            // 清除之前的事件监听器，避免重复绑定
+            mediaUploader.off('select');
             
             mediaUploader.on('select', function() {
                 console.log('用户选择了微信图片');
                 var attachment = mediaUploader.state().get('selection').first().toJSON();
                 console.log('选择的图片信息:', attachment);
-                $('#deepseek-ai-wechat-image').val(attachment.url);
-                $('#wechat-image-preview').html('<img src="' + attachment.url + '" style="max-width: 200px; height: auto; border: 1px solid #ddd; border-radius: 4px;" />');
-                $('#remove-wechat-image').show();
+                $container.find('#deepseek-ai-wechat-image').val(attachment.url);
+                $container.find('#wechat-image-preview').html('<img src="' + attachment.url + '" style="max-width: 200px; height: auto; border: 1px solid #ddd; border-radius: 4px;" />');
+                $container.find('#remove-wechat-image').show();
                 console.log('微信图片设置完成');
             });
             
@@ -231,18 +331,18 @@ jQuery(document).ready(function($) {
             mediaUploader.open();
         });
         
-        // 移除微信分享图片
-        $('#remove-wechat-image').on('click', function(e) {
+        // 移除微信分享图片 - 使用安全事件绑定
+        window.DeepSeekAI.eventUtils.safeEventBind($container.find('#remove-wechat-image'), 'click', function(e) {
             e.preventDefault();
-            $('#deepseek-ai-wechat-image').val('');
-            $('#wechat-image-preview').html('');
+            $container.find('#deepseek-ai-wechat-image').val('');
+            $container.find('#wechat-image-preview').html('');
             $(this).hide();
         });
         
         console.log('=== 事件绑定完成 ===');
         
-        console.log('=== initImageUpload 函数结束 ===');
-    }
+        console.log('=== DeepSeek AI initImageUpload 函数结束 ===');
+    };
     
     // 在文档加载完成后初始化图片上传功能
     $(document).ready(function() {
@@ -276,7 +376,7 @@ jQuery(document).ready(function($) {
         
         if (typeof wp !== 'undefined' && wp.media) {
             console.log('WordPress媒体库可用，开始初始化');
-            initImageUpload();
+            DeepSeekAI.initImageUpload();
             DEBUG.log('社交标签图片上传功能已初始化');
         } else {
             console.log('WordPress媒体库未加载，开始延迟重试');
@@ -289,7 +389,7 @@ jQuery(document).ready(function($) {
                 
                 if (typeof wp !== 'undefined' && wp.media) {
                     console.log('延迟重试成功，开始初始化');
-                    initImageUpload();
+                    DeepSeekAI.initImageUpload();
                     DEBUG.log('延迟初始化图片上传功能成功');
                 } else {
                     console.log('延迟重试失败，媒体库仍未加载');
@@ -485,14 +585,29 @@ jQuery(document).ready(function($) {
             content = $('#content').val(); // 经典编辑器文本模式
         }
         
-        // TinyMCE 可视化编辑器
-        if ((!content || content.trim().length < 10) && typeof tinymce !== 'undefined' && tinymce.get('content')) {
-            content = tinymce.get('content').getContent();
+        // TinyMCE 可视化编辑器 - 使用安全访问方法避免与主题冲突
+        if ((!content || content.trim().length < 10) && window.DeepSeekAI && window.DeepSeekAI.safeTinyMCEGet) {
+            try {
+                const editor = window.DeepSeekAI.safeTinyMCEGet('content');
+                if (editor && typeof editor.getContent === 'function') {
+                    content = editor.getContent();
+                    DEBUG.log('通过安全方法获取TinyMCE内容成功');
+                }
+            } catch (e) {
+                DEBUG.log('TinyMCE编辑器安全访问失败: ' + e.message, 'warn');
+            }
         }
         
-        // Gutenberg 块编辑器
-        if ((!content || content.trim().length < 10) && typeof wp !== 'undefined' && wp.data && wp.data.select('core/editor')) {
-            content = wp.data.select('core/editor').getEditedPostContent();
+        // Gutenberg 块编辑器 - 安全访问
+        if ((!content || content.trim().length < 10) && typeof wp !== 'undefined' && wp.data) {
+            try {
+                const editor = wp.data.select('core/editor');
+                if (editor && typeof editor.getEditedPostContent === 'function') {
+                    content = editor.getEditedPostContent();
+                }
+            } catch (e) {
+                console.warn('无法访问Gutenberg编辑器内容:', e.message);
+            }
         }
         
         // 显示加载状态
@@ -560,20 +675,42 @@ jQuery(document).ready(function($) {
             content = $('#content').val(); // 经典编辑器文本模式
         }
         
-        // TinyMCE 可视化编辑器
-        if ((!content || content.trim().length < 10) && typeof tinymce !== 'undefined' && tinymce.get('content')) {
-            content = tinymce.get('content').getContent();
+        // TinyMCE 可视化编辑器 - 使用安全访问方法避免与主题冲突
+        if ((!content || content.trim().length < 10) && window.DeepSeekAI && window.DeepSeekAI.safeTinyMCEGet) {
+            try {
+                const editor = window.DeepSeekAI.safeTinyMCEGet('content');
+                if (editor && typeof editor.getContent === 'function') {
+                    content = editor.getContent();
+                    DEBUG.log('通过安全方法获取TinyMCE内容成功');
+                }
+            } catch (e) {
+                DEBUG.log('TinyMCE编辑器安全访问失败: ' + e.message, 'warn');
+            }
         }
         
-        // Gutenberg 块编辑器
-        if ((!content || content.trim().length < 10) && typeof wp !== 'undefined' && wp.data && wp.data.select('core/editor')) {
-            content = wp.data.select('core/editor').getEditedPostContent();
+        // Gutenberg 块编辑器 - 安全访问
+        if ((!content || content.trim().length < 10) && typeof wp !== 'undefined' && wp.data) {
+            try {
+                const editor = wp.data.select('core/editor');
+                if (editor && typeof editor.getEditedPostContent === 'function') {
+                    content = editor.getEditedPostContent();
+                }
+            } catch (e) {
+                console.warn('无法访问Gutenberg编辑器内容:', e.message);
+            }
         }
         
         // 获取文章标题
         let title = $('#title').val();
-        if ((!title || title.trim().length < 5) && typeof wp !== 'undefined' && wp.data && wp.data.select('core/editor')) {
-            title = wp.data.select('core/editor').getEditedPostAttribute('title');
+        if ((!title || title.trim().length < 5) && typeof wp !== 'undefined' && wp.data) {
+            try {
+                const editor = wp.data.select('core/editor');
+                if (editor && typeof editor.getEditedPostAttribute === 'function') {
+                    title = editor.getEditedPostAttribute('title');
+                }
+            } catch (e) {
+                console.warn('无法访问Gutenberg编辑器标题:', e.message);
+            }
         }
         
         // 显示加载状态

@@ -563,8 +563,8 @@ class DeepSeekAI_Admin {
             echo '<img src="' . esc_url($social_image) . '" style="max-width: 200px; height: auto; border: 1px solid #ddd; border-radius: 4px;" />';
         }
         echo '</div>';
-        echo '<button type="button" class="button" id="upload-social-image">选择图片</button>';
-        echo '<button type="button" class="button" id="remove-social-image"' . ($social_image ? ' style="margin-left: 10px;"' : ' style="margin-left: 10px; display:none;"') . '>移除图片</button>';
+        echo '<button type="button" class="deepseek-ai-upload-btn" id="upload-social-image">选择图片</button>';
+        echo '<button type="button" class="deepseek-ai-remove-btn" id="remove-social-image"' . ($social_image ? ' style="margin-left: 10px;"' : ' style="margin-left: 10px; display:none;"') . '>移除图片</button>';
         echo '<p class="description">推荐尺寸: 1200x630px，用于Facebook、Twitter等平台</p>';
         echo '</div>';
         
@@ -576,8 +576,8 @@ class DeepSeekAI_Admin {
             echo '<img src="' . esc_url($wechat_image) . '" style="max-width: 200px; height: auto; border: 1px solid #ddd; border-radius: 4px;" />';
         }
         echo '</div>';
-        echo '<button type="button" class="button" id="upload-wechat-image">选择图片</button>';
-        echo '<button type="button" class="button" id="remove-wechat-image"' . ($wechat_image ? ' style="margin-left: 10px;"' : ' style="margin-left: 10px; display:none;"') . '>移除图片</button>';
+        echo '<button type="button" class="deepseek-ai-upload-btn" id="upload-wechat-image">选择图片</button>';
+        echo '<button type="button" class="deepseek-ai-remove-btn" id="remove-wechat-image"' . ($wechat_image ? ' style="margin-left: 10px;"' : ' style="margin-left: 10px; display:none;"') . '>移除图片</button>';
         echo '<p class="description">推荐尺寸: 300x300px，专门用于微信分享显示</p>';
         echo '</div>';
         
