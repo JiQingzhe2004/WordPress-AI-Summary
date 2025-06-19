@@ -3,7 +3,7 @@
  * API调用功能类
  *
  * @package DeepSeekAISummarizer
- * @since 3.2.0
+ * @since 3.4.5
  */
 
 // 防止直接访问
@@ -135,9 +135,9 @@ class DeepSeekAI_API {
     
     private function build_prompt($content, $type, $title = '') {
         if ($type === 'summary') {
-            return "请为以下文章内容生成一个简洁、准确的摘要，控制在150字以内：\n\n" . $content;
+            return "请为以下文章内容生成一个简洁、准确的摘要，控制在150字以内，一定要抓重点：\n\n" . $content;
         } else {
-            return "请为以下文章生成SEO优化内容：\n标题：" . $title . "\n内容：" . $content . "\n\n请返回JSON格式：{\"title\": \"SEO优化标题\", \"description\": \"SEO描述(150字内)\", \"keywords\": \"关键词1,关键词2,关键词3\"}";
+            return "请为以下文章生成SEO优化内容，一定要使其SEO标准，这样才能被搜索引擎收录，增加网站权限：\n标题：" . $title . "\n内容：" . $content . "\n\n请返回JSON格式：{\"title\": \"SEO优化标题\", \"description\": \"SEO描述(150字内)\", \"keywords\": \"关键词1,关键词2,关键词3\"}";
         }
     }
     

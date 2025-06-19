@@ -1013,5 +1013,63 @@ jQuery(document).ready(function($) {
         );
     }
     
+    // 社交媒体设置保存功能
+    $('#save-social-settings').on('click', function(e) {
+        e.preventDefault();
+        
+        const button = $(this);
+        const loadingDiv = $('#social-settings-loading');
+        const postId = $('#post_ID').val();
+        
+        if (!postId) {
+            alert('无法获取文章ID');
+            return;
+        }
+        
+        // 显示加载状态
+        button.prop('disabled', true).text('保存中...');
+        loadingDiv.show();
+        
+        // 收集表单数据
+        const socialData = {
+            action: 'save_social_settings',
+            post_id: postId,
+            social_title: $('#deepseek-ai-social-title').val(),
+            social_description: $('#deepseek-ai-social-description').val(),
+            social_image: $('#deepseek-ai-social-image').val(),
+            wechat_image: $('#deepseek-ai-wechat-image').val(),
+            nonce: deepseek_ai_ajax.nonce
+        };
+        
+        // 发送AJAX请求
+        $.ajax({
+            url: deepseek_ai_ajax.ajax_url,
+            type: 'POST',
+            data: socialData,
+            success: function(response) {
+                if (response.success) {
+                    // 显示成功消息
+                    const successMsg = $('<div class="notice notice-success is-dismissible"><p>社交媒体设置已保存成功！</p></div>');
+                    $('#aiqiji-summary-generator .inside').prepend(successMsg);
+                    
+                    // 3秒后自动隐藏成功消息
+                    setTimeout(function() {
+                        successMsg.fadeOut();
+                    }, 3000);
+                } else {
+                    alert('保存失败: ' + (response.data || '未知错误'));
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('保存失败: ' + error);
+            },
+            complete: function() {
+                // 恢复按钮状态
+                button.prop('disabled', false).text('保存');
+                loadingDiv.hide();
+            }
+        });
+    });
+    
     console.log('DeepSeek AI Summarizer 插件已加载完成');
 });

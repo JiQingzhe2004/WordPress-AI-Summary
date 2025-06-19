@@ -1,5 +1,5 @@
 /**
- * DeepSeek AI Summarizer Frontend JavaScript
+ * 爱奇吉智能摘要 Frontend JavaScript
  * 处理摘要显示和打字机效果
  */
 
@@ -22,7 +22,7 @@
         init: function() {
             this.bindEvents();
             this.initTypewriter();
-            this.log('DeepSeek AI Summarizer 已初始化');
+            this.log('爱奇吉智能摘要 已初始化');
         },
         
         // 绑定事件

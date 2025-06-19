@@ -3,7 +3,7 @@
  * 主插件类
  *
  * @package DeepSeekAISummarizer
- * @since 3.2.0
+ * @since 3.4.5
  */
 
 // 防止直接访问

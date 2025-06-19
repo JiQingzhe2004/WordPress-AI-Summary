@@ -1,4 +1,4 @@
-# DeepSeek AI Summarizer - 代码优化说明
+# 爱奇吉智能摘要 - 代码优化说明
 
 ## 优化概述
 

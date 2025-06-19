@@ -3,7 +3,7 @@
  * 前端显示功能类
  *
  * @package DeepSeekAISummarizer
- * @since 3.2.0
+ * @since 3.4.5
  */
 
 // 防止直接访问
@@ -479,11 +479,11 @@ class DeepSeekAI_Frontend {
          $image_url = '';
          
          if (!empty($social_image)) {
-             // 确保是完整的URL
-             $image_url = $this->ensure_absolute_url($social_image);
-         } elseif (has_post_thumbnail($post_id)) {
-             $image_url = get_the_post_thumbnail_url($post_id, 'large');
-         }
+            // 直接使用原始URL，不添加前缀
+            $image_url = $social_image;
+        } elseif (has_post_thumbnail($post_id)) {
+            $image_url = get_the_post_thumbnail_url($post_id, 'large');
+        }
          
          if ($image_url) {
              echo '<meta property="og:image" content="' . esc_attr($image_url) . '">' . "\n";
@@ -491,12 +491,11 @@ class DeepSeekAI_Frontend {
          }
          
          // 微信分享专用标签
-         if (!empty($wechat_image)) {
-             // 确保微信图片也是完整的URL
-             $wechat_full_url = $this->ensure_absolute_url($wechat_image);
-             echo '<meta itemprop="image" content="' . esc_attr($wechat_full_url) . '">' . "\n";
-             echo '<meta name="weixin:image" content="' . esc_attr($wechat_full_url) . '">' . "\n";
-         }
+        if (!empty($wechat_image)) {
+            // 直接使用原始URL，不添加前缀
+            echo '<meta itemprop="image" content="' . esc_attr($wechat_image) . '">' . "\n";
+            echo '<meta name="weixin:image" content="' . esc_attr($wechat_image) . '">' . "\n";
+        }
          
          // 微信分享标题和描述
          if (!empty($final_title)) {

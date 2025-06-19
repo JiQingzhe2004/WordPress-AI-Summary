@@ -3,7 +3,7 @@
  * AJAX处理功能类
  *
  * @package DeepSeekAISummarizer
- * @since 3.2.0
+ * @since 3.4.5
  */
 
 // 防止直接访问
@@ -24,6 +24,7 @@ class DeepSeekAI_Ajax {
         // AJAX处理
         add_action('wp_ajax_generate_summary', array($this, 'ajax_generate_summary'));
         add_action('wp_ajax_generate_seo', array($this, 'ajax_generate_seo'));
+        add_action('wp_ajax_save_social_settings', array($this, 'ajax_save_social_settings'));
     }
     
     public function ajax_generate_summary() {
@@ -157,6 +158,75 @@ class DeepSeekAI_Ajax {
             }
         } catch (Exception $e) {
             $this->plugin->error_log('AJAX SEO生成异常 - ' . $e->getMessage());
+            wp_send_json_error('系统错误：' . $e->getMessage());
+        }
+    }
+    
+    public function ajax_save_social_settings() {
+        // 记录开始日志
+        $this->plugin->info_log('开始保存社交媒体设置');
+        
+        // 检查是否启用AJAX调试
+        $debug_ajax = get_option('deepseek_ai_debug_ajax', false);
+        
+        try {
+            check_ajax_referer('deepseek_ai_nonce', 'nonce');
+            if ($debug_ajax) {
+                $this->plugin->debug_log('AJAX社交媒体保存 - Nonce验证通过');
+            }
+            
+            $post_id = intval($_POST['post_id']);
+            if ($debug_ajax) {
+                $this->plugin->debug_log('AJAX社交媒体保存 - 文章ID = ' . $post_id);
+            }
+            
+            // 验证用户权限
+            if (!current_user_can('edit_post', $post_id)) {
+                $this->plugin->error_log('AJAX社交媒体保存失败 - 用户无权限编辑文章，ID = ' . $post_id);
+                wp_send_json_error('您没有权限编辑此文章');
+            }
+            
+            // 保存社交媒体标题
+            if (isset($_POST['social_title'])) {
+                $social_title = sanitize_text_field($_POST['social_title']);
+                update_post_meta($post_id, '_deepseek_ai_social_title', $social_title);
+                if ($debug_ajax) {
+                    $this->plugin->debug_log('AJAX社交媒体保存 - 标题: ' . $social_title);
+                }
+            }
+            
+            // 保存社交媒体描述
+            if (isset($_POST['social_description'])) {
+                $social_description = sanitize_textarea_field($_POST['social_description']);
+                update_post_meta($post_id, '_deepseek_ai_social_description', $social_description);
+                if ($debug_ajax) {
+                    $this->plugin->debug_log('AJAX社交媒体保存 - 描述: ' . substr($social_description, 0, 100) . '...');
+                }
+            }
+            
+            // 保存通用社交分享图片
+            if (isset($_POST['social_image'])) {
+                $social_image = esc_url_raw($_POST['social_image']);
+                update_post_meta($post_id, '_deepseek_ai_social_image', $social_image);
+                if ($debug_ajax) {
+                    $this->plugin->debug_log('AJAX社交媒体保存 - 通用图片: ' . $social_image);
+                }
+            }
+            
+            // 保存微信分享图片
+            if (isset($_POST['wechat_image'])) {
+                $wechat_image = esc_url_raw($_POST['wechat_image']);
+                update_post_meta($post_id, '_deepseek_ai_wechat_image', $wechat_image);
+                if ($debug_ajax) {
+                    $this->plugin->debug_log('AJAX社交媒体保存 - 微信图片: ' . $wechat_image);
+                }
+            }
+            
+            $this->plugin->info_log('社交媒体设置保存成功，文章ID: ' . $post_id);
+            wp_send_json_success('社交媒体设置已保存');
+            
+        } catch (Exception $e) {
+            $this->plugin->error_log('AJAX社交媒体保存异常 - ' . $e->getMessage());
             wp_send_json_error('系统错误：' . $e->getMessage());
         }
     }
