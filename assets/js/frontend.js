@@ -29,6 +29,7 @@
         bindEvents: function() {
             $(document).ready(() => {
                 this.initTypewriter();
+                this.initCopyButtons();
             });
             
             // 监听动态内容加载
@@ -37,6 +38,7 @@
                     mutations.forEach((mutation) => {
                         if (mutation.addedNodes.length) {
                             this.initTypewriter();
+                            this.initCopyButtons();
                         }
                     });
                 });
@@ -45,6 +47,134 @@
                     childList: true,
                     subtree: true
                 });
+            }
+        },
+        
+        // 初始化复制按钮
+        initCopyButtons: function() {
+            const copyButtons = document.querySelectorAll('.deepseek-ai-copy-btn');
+            
+            copyButtons.forEach((button) => {
+                if (button.dataset.copyInitialized) {
+                    return; // 避免重复初始化
+                }
+                
+                button.dataset.copyInitialized = 'true';
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.copySummaryToClipboard(button);
+                });
+            });
+        },
+        
+        // 复制摘要到剪贴板
+        copySummaryToClipboard: function(button) {
+            try {
+                const container = button.closest('.deepseek-ai-summary-container');
+                if (!container) {
+                    this.warn('未找到摘要容器');
+                    return;
+                }
+                
+                // 获取摘要文本
+                let summaryText = '';
+                const contentElement = container.querySelector('.deepseek-ai-summary-content');
+                
+                if (contentElement) {
+                    // 优先使用原始文本
+                    summaryText = contentElement.dataset.originalText || contentElement.textContent || contentElement.innerText;
+                } else {
+                    // 备用方案：从data-summary属性获取
+                    summaryText = container.dataset.summary || '';
+                }
+                
+                if (!summaryText.trim()) {
+                    this.warn('摘要内容为空');
+                    this.showCopyFeedback(button, false, '摘要内容为空');
+                    return;
+                }
+                
+                // 使用现代剪贴板API
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(summaryText.trim()).then(() => {
+                        this.log('摘要已复制到剪贴板');
+                        this.showCopyFeedback(button, true);
+                    }).catch((err) => {
+                        this.error('复制失败:', err);
+                        this.fallbackCopyToClipboard(summaryText.trim(), button);
+                    });
+                } else {
+                    // 降级方案
+                    this.fallbackCopyToClipboard(summaryText.trim(), button);
+                }
+                
+            } catch (error) {
+                this.error('复制摘要时发生错误:', error);
+                this.showCopyFeedback(button, false, '复制失败');
+            }
+        },
+        
+        // 降级复制方案
+        fallbackCopyToClipboard: function(text, button) {
+            try {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                if (successful) {
+                    this.log('摘要已通过降级方案复制到剪贴板');
+                    this.showCopyFeedback(button, true);
+                } else {
+                    this.warn('降级复制方案也失败了');
+                    this.showCopyFeedback(button, false, '复制失败');
+                }
+            } catch (err) {
+                this.error('降级复制方案失败:', err);
+                this.showCopyFeedback(button, false, '复制失败');
+            }
+        },
+        
+        // 显示复制反馈
+        showCopyFeedback: function(button, success, message = null) {
+            const originalTitle = button.title;
+            const originalSVG = button.innerHTML;
+            
+            if (success) {
+                button.classList.add('copied');
+                button.title = '已复制！';
+                
+                // 显示成功图标
+                button.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></svg>';
+                
+                // 2秒后恢复原状
+                setTimeout(() => {
+                    button.classList.remove('copied');
+                    button.title = originalTitle;
+                    button.innerHTML = originalSVG;
+                }, 2000);
+                
+            } else {
+                button.classList.add('error');
+                button.title = message || '复制失败';
+                
+                // 显示错误图标
+                button.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/></svg>';
+                
+                // 2秒后恢复原状
+                setTimeout(() => {
+                    button.classList.remove('error');
+                    button.title = originalTitle;
+                    button.innerHTML = originalSVG;
+                }, 2000);
             }
         },
         

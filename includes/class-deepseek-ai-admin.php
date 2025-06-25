@@ -3,7 +3,7 @@
  * 管理后台功能类
  *
  * @package DeepSeekAISummarizer
- * @since 3.4.5
+ * @since 3.5.0
  */
 
 // 防止直接访问

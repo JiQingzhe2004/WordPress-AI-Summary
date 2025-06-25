@@ -3,7 +3,7 @@
  * 前端显示功能类
  *
  * @package DeepSeekAISummarizer
- * @since 3.4.5
+ * @since 3.5.0
  */
 
 // 防止直接访问
@@ -221,8 +221,17 @@ class DeepSeekAI_Frontend {
         // 使用模板文件生成HTML，移除内联样式
         $summary_html = '<div class="deepseek-ai-summary-container deepseek-ai-loaded" data-summary="' . esc_attr($summary) . '" data-post-id="' . get_the_ID() . '">';
         $summary_html .= '<div class="deepseek-ai-summary-header">';
+        $summary_html .= '<div class="deepseek-ai-header-left">';
         $summary_html .= '<span class="deepseek-ai-icon">🤖</span>';
         $summary_html .= '<span class="deepseek-ai-title">' . esc_html__('AI 智能摘要（爱奇吉）', 'deepseek-ai-summarizer') . '</span>';
+        $summary_html .= '</div>';
+        $summary_html .= '<div class="deepseek-ai-header-right">';
+        $summary_html .= '<button class="deepseek-ai-copy-btn" title="' . esc_attr__('复制摘要', 'deepseek-ai-summarizer') . '" aria-label="' . esc_attr__('复制摘要到剪贴板', 'deepseek-ai-summarizer') . '">';
+        $summary_html .= '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">';
+        $summary_html .= '<path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z" fill="currentColor"/>';
+        $summary_html .= '</svg>';
+        $summary_html .= '</button>';
+        $summary_html .= '</div>';
         $summary_html .= '</div>';
         // 输出空的摘要容器，等待JavaScript打字机效果填充
         $summary_html .= '<div class="deepseek-ai-summary-content deepseek-ai-content" data-original-text="' . esc_attr($summary) . '" data-typewriter-speed="' . esc_attr($this->get_typewriter_speed()) . '"></div>';
