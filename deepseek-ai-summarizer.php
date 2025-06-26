@@ -9,7 +9,7 @@
  * - SEO优化建议
  * - 自定义摘要长度
  * - 响应式设计
- * Version: 3.5.1
+ * Version: 3.5.2
  * Requires at least: 5.0
  * Requires PHP: 7.4
  * Author: 吉庆喆
@@ -18,7 +18,7 @@
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * 
  * @package DeepSeekAISummarizer
- * @since 3.5.1
+ * @since 3.5.2
  * 
  * 爱奇吉摘要 is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ if (!defined('DEEPSEEK_AI_PLUGIN_PATH')) {
     define('DEEPSEEK_AI_PLUGIN_PATH', plugin_dir_path(__FILE__));
 }
 if (!defined('DEEPSEEK_AI_VERSION')) {
-    define('DEEPSEEK_AI_VERSION', '3.5.1');
+    define('DEEPSEEK_AI_VERSION', '3.5.2');
 }
 
 // 加载主插件类

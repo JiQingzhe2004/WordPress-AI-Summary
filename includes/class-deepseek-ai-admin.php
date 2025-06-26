@@ -3,7 +3,7 @@
  * 管理后台功能类
  *
  * @package DeepSeekAISummarizer
- * @since 3.5.1
+ * @since 3.5.2
  */
 
 // 防止直接访问
@@ -578,7 +578,7 @@ class DeepSeekAI_Admin {
         echo '</div>';
         echo '<button type="button" class="deepseek-ai-upload-btn" id="upload-wechat-image">选择图片</button>';
         echo '<button type="button" class="deepseek-ai-remove-btn" id="remove-wechat-image"' . ($wechat_image ? ' style="margin-left: 10px;"' : ' style="margin-left: 10px; display:none;"') . '>移除图片</button>';
-        echo '<p class="description">推荐尺寸: 300x300px，专门用于微信分享显示</p>';
+        echo '<p class="description">推荐尺寸: 300x300px，使用标准Open Graph格式(og:image)，微信会自动识别</p>';
         echo '</div>';
         
         echo '<div class="deepseek-ai-controls" style="margin-top: 20px;">';

@@ -3,7 +3,7 @@
  * 前端显示功能类
  *
  * @package DeepSeekAISummarizer
- * @since 3.5.1
+ * @since 3.5.2
  */
 
 // 防止直接访问
@@ -499,21 +499,21 @@ class DeepSeekAI_Frontend {
              echo '<meta name="twitter:image" content="' . esc_attr($image_url) . '">' . "\n";
          }
          
-         // 微信分享专用标签
+         // 微信分享专用图片（覆盖默认og:image）
         if (!empty($wechat_image)) {
-            // 直接使用原始URL，不添加前缀
+            // 微信分享使用专用图片，覆盖之前的og:image
+            echo '<meta property="og:image" content="' . esc_attr($wechat_image) . '">' . "\n";
             echo '<meta itemprop="image" content="' . esc_attr($wechat_image) . '">' . "\n";
-            echo '<meta name="weixin:image" content="' . esc_attr($wechat_image) . '">' . "\n";
+            // 添加图片尺寸信息（微信推荐300x300）
+            echo '<meta property="og:image:width" content="300">' . "\n";
+            echo '<meta property="og:image:height" content="300">' . "\n";
         }
          
-         // 微信分享标题和描述
-         if (!empty($final_title)) {
-             echo '<meta name="weixin:title" content="' . esc_attr($final_title) . '">' . "\n";
-         }
+         // 微信分享会自动读取标准的Open Graph标签
+         // 不需要额外的weixin:标签，因为微信支持标准的og:标签
          
-         if (!empty($final_description)) {
-             echo '<meta name="weixin:description" content="' . esc_attr($final_description) . '">' . "\n";
-         }
+         // 添加主题色彩（可选）
+         echo '<meta name="theme-color" content="#1a1f3c">' . "\n";
          
          // 添加结构化数据 (JSON-LD)
          $this->add_structured_data($post_id, $final_title, $final_description, $seo_keywords, $image_url);
