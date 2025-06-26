@@ -718,6 +718,61 @@
     }
 }
 
+/* WordPress 通知框样式修复 */
+.wrap .notice {
+    background: #fff;
+    border-left: 4px solid #00a0d2;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+    margin: 5px 0 15px;
+    padding: 1px 12px;
+    position: relative;
+    border-radius: 0;
+}
+
+.wrap .notice.notice-success {
+    border-left-color: #46b450;
+}
+
+.wrap .notice.notice-warning {
+    border-left-color: #ffb900;
+}
+
+.wrap .notice.notice-error {
+    border-left-color: #dc3232;
+}
+
+.wrap .notice.notice-info {
+    border-left-color: #00a0d2;
+}
+
+.wrap .notice p {
+    margin: 0.5em 0;
+    padding: 2px;
+    color: #23282d;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.wrap .notice.is-dismissible {
+    padding-right: 38px;
+}
+
+.wrap .notice .notice-dismiss {
+    position: absolute;
+    top: 0;
+    right: 1px;
+    border: none;
+    margin: 0;
+    padding: 9px;
+    background: none;
+    color: #787c82;
+    cursor: pointer;
+}
+
+.wrap .notice .notice-dismiss:hover {
+    color: #c00;
+}
+
 /* 工具提示样式 */
 .deepseek-ai-tooltip {
     position: relative;

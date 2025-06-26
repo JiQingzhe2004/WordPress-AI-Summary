@@ -3,7 +3,7 @@
  * 管理后台功能类
  *
  * @package DeepSeekAISummarizer
- * @since 3.5.0
+ * @since 3.5.1
  */
 
 // 防止直接访问
@@ -652,10 +652,10 @@ class DeepSeekAI_Admin {
             $this->plugin->info_log('插件设置已更新');
         }
         
-        // 显示设置错误/更新消息
-        settings_errors('deepseek_ai_messages');
-        
         echo '<div class="wrap">';
+        
+        // 显示设置错误/更新消息（放在头部之前）
+        settings_errors('deepseek_ai_messages');
         
         // 添加LOGO头部
         echo '<div class="deepseek-ai-settings-header" style="display: flex; align-items: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #1a1f3c 0%, #2d3a6d 100%); border-radius: 15px; color: white; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);">';

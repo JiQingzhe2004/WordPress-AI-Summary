@@ -198,7 +198,7 @@ define('WP_DEBUG_LOG', true);
 
 - **插件名称**：爱奇吉摘要
 - **插件作者**：[Forrest](https://github.com/JiQingzhe2004)
-- **插件版本**：3.5.0
+- **插件版本**：3.5.1
 - **插件许可证**：GPL v2或更高版本
 - **插件支持**：[意见反馈](https://github.com/JiQingzhe2004/WordPress-AI-Summary/issues)
 

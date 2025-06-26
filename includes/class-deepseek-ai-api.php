@@ -3,7 +3,7 @@
  * API调用功能类
  *
  * @package DeepSeekAISummarizer
- * @since 3.5.0
+ * @since 3.5.1
  */
 
 // 防止直接访问
