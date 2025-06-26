@@ -3,7 +3,7 @@
  * 管理后台功能类
  *
  * @package DeepSeekAISummarizer
- * @since 3.5.3
+ * @since 3.5.4
  */
 
 // 防止直接访问
@@ -584,6 +584,15 @@ class DeepSeekAI_Admin {
         echo '<div class="deepseek-ai-controls" style="margin-top: 20px;">';
         echo '<button type="button" class="deepseek-ai-btn social" id="save-social-settings" data-post-id="' . $post->ID . '">保存</button>';
         echo '<div class="deepseek-ai-loading" id="social-loading" style="display:none;">正在保存...</div>';
+        echo '</div>';
+        
+        // 版权信息
+        echo '<div class="deepseek-ai-copyright" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-left: 4px solid #007cba; border-radius: 4px;">';
+        echo '<p style="margin: 0; color: #666; font-size: 13px; line-height: 1.5;">';
+        echo '<i class="dashicons dashicons-info" style="color: #007cba; margin-right: 5px;"></i>';
+        echo '本插件由 <strong>爱奇吉</strong> 开发，基于 AI 技术提供智能内容生成服务。';
+        echo '<br>如有问题或建议，请访问 <a href="https://www.aiqji.cn/contact" target="_blank" style="color: #007cba; text-decoration: none;">官方网站</a> 或联系技术支持。';
+        echo '</p>';
         echo '</div>';
         
         echo '</div>';
