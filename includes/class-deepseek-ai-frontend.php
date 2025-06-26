@@ -3,7 +3,7 @@
  * 前端显示功能类
  *
  * @package DeepSeekAISummarizer
- * @since 3.5.2
+ * @since 3.5.3
  */
 
 // 防止直接访问

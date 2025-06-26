@@ -20,9 +20,9 @@
 
 /* 摘要头部样式 */
 .deepseek-ai-summary-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     margin-bottom: 10px;
     font-weight: bold;
     color: #007cba;
@@ -55,7 +55,7 @@
 }
 
 .deepseek-ai-copy-btn:hover {
-    background-color: rgba(0, 124, 186, 0.1);
+    background: none;
     opacity: 1;
     transform: scale(1.1);
 }
